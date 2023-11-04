@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <string>
 #include <sstream>
 #include <regex>
@@ -18,15 +19,18 @@ private:
 	string fullCmd = "";
 public:
 	bool checkCmd() {
-		regex createTableRegex("\\s*CREATE\\s+TABLE\\s+[A-Za-z][A-Za-z0-9]*\\s*(?:IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]*,\\s*[A-Za-z]+,\\s*[A-Za-z]+\\s*\\)\\s*,?\\s*)+?)\\s*\\)", std::regex::icase);
+		regex createTableRegex("\\s*CREATE\\s+TABLE\\s+[A-Za-z][A-Za-z0-9]*\\s*(?:IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*([A-Za-z][A-Za-z0-9]*),\\s*([A-Za-z]+),\\s*[0-9]*,\\s*([A-Za-z0-9]+)\\s*\\)\\s*,?\\s*)+?)\\s*\\)", std::regex::icase);
 		smatch matches;
 
-		if (regex_search(fullCmd, matches, createTableRegex)) {
-			cout << "Match found." << matches[0];
-
+		if (regex_search(this->fullCmd, matches, createTableRegex)) {
+			// asta e ce e in paranteza. acum trebuie facut cumva sa scoti fiecare col name, type name , size si default value
+			cout << matches[1];
+			
 			return 1;
 		}
 
+
+		
 		return 0;
 	}
 
