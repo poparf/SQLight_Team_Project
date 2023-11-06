@@ -12,16 +12,17 @@
 */
 using namespace std;
 
-#define NO_SECONDARY_COMANDS 3
+#define NO_SECONDARY_COMMANDS 3
 
 int checkSecondaryCommand(string fullCmd) {
-	string additionalCommands[NO_SECONDARY_COMANDS] = { "/quit", "/clear", "/help" };
+	string additionalCommands[NO_SECONDARY_COMMANDS] = { "/quit", "/clear", "/help" };
 
-	for (int i = 0; i < NO_SECONDARY_COMANDS; i++) {
+	for (int i = 0; i < NO_SECONDARY_COMMANDS; i++) {
 		if (fullCmd == additionalCommands[i]) {
 			return i + 1;
 		}
 	}
+	return -1;
 }
 
 
