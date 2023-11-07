@@ -67,8 +67,20 @@ public:
 		return newColumns;
 	}
 
+	void operator=(const Table& table) {
+		this->name = table.name;
+
+		Column* newCols = new Column[table.noColumns];
+		for (int i = 0; i < table.noColumns; i++) {
+			newCols[i] = table.columns[i];
+		}
+		this->columns = newCols;
+
+		this->noColumns = table.noColumns;
+	}
+
 	Table(Table& table) {
-		this->name = table.getName();
+		this->name = table.name;
 		
 		Column* newCols = new Column[table.noColumns];
 		for (int i = 0; i < table.noColumns; i++) {
@@ -76,7 +88,7 @@ public:
 		}
 		this->columns = newCols;
 
-		this->noColumns = table.getNoColumns();
+		this->noColumns = table.noColumns;
 	}
 
 	~Table() {
