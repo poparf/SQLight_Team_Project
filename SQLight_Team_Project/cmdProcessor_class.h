@@ -7,19 +7,165 @@
 #include "table_class.h"
 using namespace std;
 
+
+struct properFormats {
+	string properCt = "CREATE TABLE table_name [IF NOT EXISTS] ( (column_name1, type, size, default_value1), (column_name1, type, size, default_value1)... )";
+	string properCi = "CREATE INDEX [IF NOT EXISTS] index_name ON table_name (column_name) - creates an index only on a single column";
+	string properDt = "DROP TABLE table_name";
+	string properDi = "DROP INDEX index_name";
+	string properDplt = "DISPLAY TABLE table_name";
+	string properIi = "INSERT INTO table VALUES(...); values are separated by , and they have the exact number and order as the table definition";
+	string properDf = "DELETE FROM table_name WHERE column_name = value (deletes allows only one column in the where clause)";
+	string properSt = "SELECT (at_least_one_column, ...) | ALL FROM table_name [WHERE column_name = value] - the where clause is optional";
+	string properUe = "UPDATE table_name SET column_name = value WHERE  column_name = value (the SET column may be different than the WHERE one)";
+};
+// se pun aici regex-urile pt ca sunt foarte lungi si nu se intelege
+// nu o sa arate formatul potrivit acum chiar daca scrii doar DIsplay TABLE de ex pt ca regex-urile
+// urmatoare nu au nimic scris
+struct regexList {
+	string fullCreateTable = "\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9]*)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]*,\\s*[A-Za-z]+,\\s*[0-9]*,\\s*[A-Za-z0-9]+\\s*\\)\\s*,?\\s*)+?)\\s*\\)";
+	string fullCreateIndex = "";
+	string fullDropTable = "";
+	string fullDropIndex = "";
+	string fullDisplayTable = "";
+	string fullInsertInto = "";
+	string fullDeleteFrom = "";
+	string fullSelect = "";
+	string fullUpdate = "";
+};
+// pana aici
 class CmdProcessor
 {
 private:
 	string fullCmd = "";
 public:
-	bool checkCmd() {
-		regex createTableRegex("\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9]*)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]*,\\s*[A-Za-z]+,\\s*[0-9]*,\\s*[A-Za-z0-9]+\\s*\\)\\s*,?\\s*)+?)\\s*\\)", regex::icase);
+	bool checkCmd(TableBuffer& tableBuffer) {
+		properFormats formats;
+		regexList rlist;
+
+		regex ct("\\s*CREATE\\s+TABLE\\s*", regex::icase);
+		regex ci("\\s*CREATE\\s+INDEX\\s*", regex::icase);
+		regex dt("\\s*DROP\\s+TABLE\\s*", regex::icase);
+		regex di("\\s*DROP\\s+INDEX\\s*", regex::icase);
+		regex dplt("\\s*DISPLAY\\s+TABLE\\s*", regex::icase);
+		regex ii("\\s*INSERT\\s+INTO\\s*", regex::icase);
+		regex df("\\s*DELETE\\s+FROM\\s*", regex::icase);
+		regex st("\\s*SELECT\\s*", regex::icase);
+		regex ue("\\s*UPDATE\\s*", regex::icase);
+
+		regex createTableRegex(rlist.fullCreateTable, regex::icase);
+		regex createIndexRegex(rlist.fullCreateIndex, regex::icase);
+		regex dropTableRegex(rlist.fullDropTable, regex::icase);
+		regex dropIndexRegex(rlist.fullDropIndex, regex::icase);
+		regex displayTableRegex(rlist.fullDisplayTable, regex::icase);
+		regex insertIntoRegex(rlist.fullInsertInto, regex::icase);
+		regex deleteFromRegex(rlist.fullDeleteFrom, regex::icase);
+		regex selectRegex(rlist.fullSelect, regex::icase);
+		regex updateRegex(rlist.fullUpdate, regex::icase);
+
 		smatch matches;
 
-		if (regex_search(this->fullCmd, matches, createTableRegex)) {
-			this->createTable(matches);
-			return 1;
+		if (regex_search(this->fullCmd, ct)) {
+
+			if (regex_search(this->fullCmd, matches, createTableRegex)) {
+				tableBuffer = tableBuffer + *this->createTable(matches);
+				return 1;
+			}
+			else {
+				cout << endl << "Proper format is:" << "\n" << formats.properCt;
+				return 1;
+			}
 		}
+		else if(regex_search(this->fullCmd, ci)){
+
+			if (regex_search(this->fullCmd, matches, createIndexRegex)) {
+				this->createIndex(matches);
+				return 1;
+			}
+			else {
+				cout << endl << "Proper format is:" << "\n" << formats.properCi;
+				return 1;
+			}
+		}
+		else if (regex_search(this->fullCmd, dt)) {
+
+			if (regex_search(this->fullCmd, matches, dropTableRegex)) {
+				this->createIndex(matches);
+				return 1;
+			}
+			else {
+				cout << endl << "Proper format is:" << "\n" << formats.properDt;;
+				return 1;
+			}
+		}
+		else if (regex_search(this->fullCmd, di)) {
+
+			if (regex_search(this->fullCmd, matches, dropIndexRegex)) {
+				this->createIndex(matches);
+				return 1;
+			}
+			else {
+				cout << endl << "Proper format is:" << "\n" << formats.properDi;
+				return 1;
+			}
+		}
+		else if (regex_search(this->fullCmd, dplt)) {
+
+			if (regex_search(this->fullCmd, matches, displayTableRegex)) {
+				this->createIndex(matches);
+				return 1;
+			}
+			else {
+				cout << endl << "Proper format is:" << "\n" << formats.properDplt;
+				return 1;
+			}
+		}
+		else if (regex_search(this->fullCmd, ii)) {
+
+			if (regex_search(this->fullCmd, matches, insertIntoRegex)) {
+				this->createIndex(matches);
+				return 1;
+			}
+			else {
+				cout << endl << "Proper format is:" << "\n" << formats.properIi;
+				return 1;
+			}
+		}
+		else if (regex_search(this->fullCmd, df)) {
+
+			if (regex_search(this->fullCmd, matches, deleteFromRegex)) {
+				this->createIndex(matches);
+				return 1;
+			}
+			else {
+				cout << endl << "Proper format is:" << "\n" << formats.properDf;
+				return 1;
+			}
+		}
+		else if (regex_search(this->fullCmd, st)) {
+
+			if (regex_search(this->fullCmd, matches, selectRegex)) {
+				this->createIndex(matches);
+				return 1;
+			}
+			else {
+				cout << endl << "Proper format is:" << "\n" << formats.properSt;
+				return 1;
+			}
+		}
+		else if (regex_search(this->fullCmd, ue)) {
+
+			if (regex_search(this->fullCmd, matches, updateRegex)) {
+				this->createIndex(matches);
+				return 1;
+			}
+			else {
+				cout << endl << "Proper format is:" << "\n" << formats.properUe;
+				return 1;
+			}
+		}
+
+
 		return 0;
 	}
 
@@ -38,7 +184,7 @@ public:
 	}
 
 private:
-	void createTable(smatch matches) {
+	Table* createTable(smatch matches) {
 		regex partitionRegex("[^() ,][a-zA-Z0-9]*");
 		smatch partitionMatches;
 
@@ -108,11 +254,45 @@ private:
 				k = 0;
 			}
 		}
+		// aici in viitor o sa avem o functie care sa salveze tabelul
+		// si in fisier 
+		//Table t(tableName, columns, j);
+		
+		Table* returnTable = new Table(tableName, columns, j);
+		cout << *returnTable;
+		return returnTable;
+	}
 
-		Table t(tableName, columns, j);
-		cout << t;
-		delete[] columns;
-		// aici trebuie facut ceva cu tabelul.
-		// doSomethingWithTable(t)
+	// trebuie lucrat de aici in jos
+	void createIndex(smatch matches) {
+		return;
+	}
+
+	void dropTable(smatch matches) {
+		return;
+	}
+
+	void dropIndex(smatch matches) {
+		return;
+	}
+
+	void displayTable(smatch matches) {
+		return;
+	}
+
+	void insertInto(smatch matches) {
+		return;
+	}
+
+	void deleteFrom(smatch matches) {
+		return;
+	}
+
+	void select(smatch matches) {
+		return;
+	}
+
+	void update(smatch matches) {
+		return;
 	}
 };

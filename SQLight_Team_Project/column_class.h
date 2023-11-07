@@ -13,6 +13,8 @@ private:
 	columnTypes type = columnTypes::NUMBER;
 	size_t size = 0;
 	string defaultValue = "";
+
+
 public:
 
 	void setDefaultValue(string input) {
