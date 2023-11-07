@@ -68,6 +68,9 @@ public:
 		if (regex_search(this->fullCmd, ct)) {
 
 			if (regex_search(this->fullCmd, matches, createTableRegex)) {
+				// this crashes
+				// tableBuffer = tableBuffer + *this->createTable(matches)
+				// ******
 				this->createTable(matches);
 				return 1;
 			}
