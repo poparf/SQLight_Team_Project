@@ -23,15 +23,15 @@ struct properFormats {
 // nu o sa arate formatul potrivit acum chiar daca scrii doar DIsplay TABLE de ex pt ca regex-urile
 // urmatoare nu au nimic scris
 struct regexList {
-	string fullCreateTable = "\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9]*)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]*,\\s*[A-Za-z]+,\\s*[0-9]*,\\s*[A-Za-z0-9]+\\s*\\)\\s*,?\\s*)+?)\\s*\\)";
-	string fullCreateIndex = "";
-	string fullDropTable = "";
-	string fullDropIndex = "";
-	string fullDisplayTable = "";
-	string fullInsertInto = "";
-	string fullDeleteFrom = "";
-	string fullSelect = "";
-	string fullUpdate = "";
+	string fullCreateTable = "\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9]+)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]+\\s*,\\s*[A-Za-z]+\\s*,\\s*[0-9]+\\s*,\\s*[A-Za-z0-9]+\\s*\\)\\s*,?\\s*)+?)\\s*\\)";
+	string fullCreateIndex = "\\s*CREATE\\s+INDEX\\s*(IF\\s+NOT\\s+EXISTS)?\\s+([a-zA-Z0-9]+)\\s+ON\\s+([a-zA-Z0-9]+)\\s+\\((\\s*[a-zA-Z0-9]+)\\s*\\)";
+	string fullDropTable = "\\s*DROP\\s+TABLE\\s+([a-zA-Z0-9]+)\\s*";
+	string fullDropIndex = "\\s*DROP\\s+INDEX\\s+([a-zA-Z0-9]+)\\s*";
+	string fullDisplayTable = "\\s*DISPLAY\\s+TABLE\\s+([a-zA-Z0-9]*)\\s*";
+	string fullInsertInto = "\\s*INSERT\\s+INTO\\s+([a-zA-Z0-9]+)\\s+VALUES\s*\\(((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+)\\)\\s*";
+	string fullDeleteFrom = "\\s*DELETE\\s+FROM\\s+([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s+=\\s+([a-zA-Z0-9]+)\\s*";
+	string fullSelect = "\\s*SELECT\\s*((\\((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+\\))+|(ALL))\\s*FROM\\s+([a-zA-Z0-9]+)+\\s*(WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+))?";
+	string fullUpdate = "\\s*UPDATE\\s+([a-zA-Z0-9]+)\\s+SET\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+)\\s*";
 };
 // pana aici
 class CmdProcessor
@@ -68,7 +68,7 @@ public:
 		if (regex_search(this->fullCmd, ct)) {
 
 			if (regex_search(this->fullCmd, matches, createTableRegex)) {
-				tableBuffer = tableBuffer + *this->createTable(matches);
+				this->createTable(matches);
 				return 1;
 			}
 			else {
@@ -90,7 +90,7 @@ public:
 		else if (regex_search(this->fullCmd, dt)) {
 
 			if (regex_search(this->fullCmd, matches, dropTableRegex)) {
-				this->createIndex(matches);
+				this->dropTable(matches);
 				return 1;
 			}
 			else {
@@ -101,7 +101,7 @@ public:
 		else if (regex_search(this->fullCmd, di)) {
 
 			if (regex_search(this->fullCmd, matches, dropIndexRegex)) {
-				this->createIndex(matches);
+				this->dropIndex(matches);
 				return 1;
 			}
 			else {
@@ -112,7 +112,7 @@ public:
 		else if (regex_search(this->fullCmd, dplt)) {
 
 			if (regex_search(this->fullCmd, matches, displayTableRegex)) {
-				this->createIndex(matches);
+				this->displayTable(matches);
 				return 1;
 			}
 			else {
@@ -123,7 +123,7 @@ public:
 		else if (regex_search(this->fullCmd, ii)) {
 
 			if (regex_search(this->fullCmd, matches, insertIntoRegex)) {
-				this->createIndex(matches);
+				this->insertInto(matches);
 				return 1;
 			}
 			else {
@@ -134,7 +134,7 @@ public:
 		else if (regex_search(this->fullCmd, df)) {
 
 			if (regex_search(this->fullCmd, matches, deleteFromRegex)) {
-				this->createIndex(matches);
+				this->deleteFrom(matches);
 				return 1;
 			}
 			else {
@@ -145,7 +145,7 @@ public:
 		else if (regex_search(this->fullCmd, st)) {
 
 			if (regex_search(this->fullCmd, matches, selectRegex)) {
-				this->createIndex(matches);
+				this->select(matches);
 				return 1;
 			}
 			else {
@@ -156,7 +156,7 @@ public:
 		else if (regex_search(this->fullCmd, ue)) {
 
 			if (regex_search(this->fullCmd, matches, updateRegex)) {
-				this->createIndex(matches);
+				this->update(matches);
 				return 1;
 			}
 			else {
