@@ -5,14 +5,16 @@
 
 using namespace std;
 
-enum columnTypes { NUMBER, STRING };
+enum columnTypes { INTEGER, FLOAT, TEXT };
 
 class Column {
 private:
 	string columnName = "";
-	columnTypes type = columnTypes::NUMBER;
+	columnTypes type = columnTypes::TEXT;
 	size_t size = 0;
 	string defaultValue = "";
+
+
 public:
 
 	void setDefaultValue(string input) {

@@ -28,6 +28,8 @@ int checkSecondaryCommand(string fullCmd) {
 
 int main() {
 	CmdProcessor buffer;
+	properFormats formats;
+	TableBuffer tableBuffer;
 
 	while (1) {
 		printLine();
@@ -55,16 +57,14 @@ int main() {
 					cout << endl << "Available commands at this point:";
 					cout << "\n" << "/quit";
 					cout << "\n" << "/clear";
-					cout << "\n" << "1.CREATE TABLE table_name [IF NOT EXISTS] ( (column_name1, type, size, default_value1), (column_name1, type, size, default_value1)... )";
+					cout << "\n" << formats.properCt;
 					cout << "\n" << "* Type must be 'string' or 'number'.";
 					break;
 				default:
-					if (buffer.checkCmd()) {
-
+					if (!buffer.checkCmd(tableBuffer)) {
+						cout << endl << "Command not recognized: " << buffer.getFullCmd();
 					}
-					else {
-						cout << "Command not recognized: " << buffer.getFullCmd();
-					}
+					
 					break;
 			}
 		}

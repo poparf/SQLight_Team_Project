@@ -2,7 +2,7 @@
 
 **TODO**
 
- 1. Trb regex pt fiecare tip de comanda. Pentru create table am facut eu si merge. 
+ 1. TableBuffer e buguit.. momentan nu merge
 
 
 Numele sunt puse cam prost

@@ -3,6 +3,7 @@
 #include <string>
 #include "utils.h"
 #include "column_class.h"
+#include "row_class.h"
 
 using namespace std;
 
@@ -11,7 +12,15 @@ private:
 	string name = " ";
 	Column* columns = nullptr;
 	int noColumns = 0;
+	Row* rows = nullptr;
+	int noRows = 0;
 public:
+	// pt tableBuffer
+	// in viitor nu va mai fi public si prin inheritance il vom putea folosi doar in tableBuffer
+	Table() {
+
+	}
+
 	Table(string inputName, Column* inputColumns, int inputNoColumns) {
 		this->columns = new Column[inputNoColumns];
 
@@ -21,6 +30,14 @@ public:
 		}
 
 		this->setName(inputName);
+	}
+
+	void insertOneRow(Row input) {
+		
+	}
+
+	void insertRows(Row* input) {
+
 	}
 
 	string getName() {
@@ -50,10 +67,28 @@ public:
 		return newColumns;
 	}
 
+	void operator=(const Table& table) {
+		this->name = table.name;
+
+		Column* newCols = new Column[table.noColumns];
+		for (int i = 0; i < table.noColumns; i++) {
+			newCols[i] = table.columns[i];
+		}
+		this->columns = newCols;
+
+		this->noColumns = table.noColumns;
+	}
+
 	Table(Table& table) {
-		this->name = table.getName();
-		this->columns = table.getColumns();
-		this->noColumns = table.getNoColumns();
+		this->name = table.name;
+		
+		Column* newCols = new Column[table.noColumns];
+		for (int i = 0; i < table.noColumns; i++) {
+			newCols[i] = table.columns[i];
+		}
+		this->columns = newCols;
+
+		this->noColumns = table.noColumns;
 	}
 
 	~Table() {
@@ -71,3 +106,85 @@ void operator<<(ostream& console, Table t) {
 	}
 	delete[] columns;
 }
+
+
+class TableBuffer {
+	Table* tables = nullptr;
+	int noTables = 0;
+public:
+	TableBuffer() {
+
+	}
+
+
+	Table* getTables() {
+		Table* newTables = new Table[this->noTables];
+		for (int i = 0; i < this->noTables; i++) {
+			newTables[i] = this->tables[i];
+		}
+		return newTables;
+	}
+
+	int getNoTables() {
+		return this->noTables;
+	}
+
+	void setNoTables(int input) {
+		if (input < 0) {
+			throw exception("Number of tables must be positive or 0.");
+		}
+		this->noTables = input;
+	}
+
+	TableBuffer(const TableBuffer& tableBuffer) {
+		this->noTables = tableBuffer.noTables; 
+		this->tables = new Table[tableBuffer.noTables];
+		for (int i = 0; i < tableBuffer.noTables; i++) {
+			this->tables[i] = tableBuffer.tables[i]; // Make a deep copy of each table
+		}
+	}
+
+	void insertTable(const Table& input) {
+		Table* newTables = new Table[this->noTables + 1];
+
+		for (int i = 0; i < this->noTables; i++) {
+			newTables[i] = this->tables[i];
+		}
+
+		newTables[this->noTables] = input;
+
+		this->noTables += 1;
+
+		delete[] this->tables;
+
+		this->tables = newTables;
+	}
+
+	TableBuffer operator+(const Table& right) {
+
+		TableBuffer copy = *this;
+		copy.insertTable(right);
+		
+		return copy;
+	}
+
+	void operator=(const TableBuffer& right) {
+		if (this == &right) {
+			return;
+		}
+		delete[] this->tables;
+		this->tables = new Table[right.noTables];
+		for (int i = 0; i < right.noTables; i++) {
+			this->tables[i] = right.tables[i];
+		}
+		this->noTables = right.noTables;
+
+	}
+
+	// daca nu l las asa si pun
+	// delete[] tables;
+	// imi sterge toate coloanele si toate tabelele
+	~TableBuffer() {
+		
+	}
+};
