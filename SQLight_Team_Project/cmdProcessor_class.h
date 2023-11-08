@@ -28,7 +28,7 @@ struct regexList {
 	string fullDropTable = "^\\s*DROP\\s+TABLE\\s+([a-zA-Z0-9]+)\\s*$";
 	string fullDropIndex = "^\\s*DROP\\s+INDEX\\s+([a-zA-Z0-9]+)\\s*$";
 	string fullDisplayTable = "^\\s*DISPLAY\\s+TABLE\\s+([a-zA-Z0-9]*)\\s*$";
-	string fullInsertInto = "^\\s*INSERT\\s+INTO\\s+([a-zA-Z0-9]+)\\s+VALUES\s*\\(((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+)\\)\\s*$";
+	string fullInsertInto = "^\\s*INSERT\\s+INTO\\s+([a-zA-Z0-9]+)\\s+VALUES\\s*\\(((\\s*[a-zA-Z0-9\"'’”]+\\s*,?\\s*)+)\\)\\s*$";
 	string fullDeleteFrom = "^\\s*DELETE\\s+FROM\\s+([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s+=\\s+([a-zA-Z0-9]+)\\s*$";
 	string fullSelect = "^\\s*SELECT\\s*((\\((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+\\))+|(ALL))\\s*FROM\\s+([a-zA-Z0-9]+)+\\s*(WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+))?$";
 	string fullUpdate = "^\\s*UPDATE\\s+([a-zA-Z0-9]+)\\s+SET\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+)\\s*$";
@@ -123,7 +123,7 @@ public:
 		else if (regex_search(this->fullCmd, ii)) {
 
 			if (regex_search(this->fullCmd, matches, insertIntoRegex)) {
-				this->insertInto(matches);
+				this->insertInto(matches, tableBuffer);
 				return 1;
 			}
 			else {
@@ -185,7 +185,7 @@ public:
 
 private:
 	Table createTable(smatch matches) {
-		regex partitionRegex("[^() ,][a-zA-Z0-9’’|""|'']*");
+		regex partitionRegex("[^ ,()][a-zA-Z0-9\"'”’\\s*]*");
 		smatch partitionMatches;
 
 
@@ -236,7 +236,7 @@ private:
 				else if (toLowerCase(match_str) == "text")
 					columns[j].setType(columnTypes::TEXT);
 				else
-					throw exception("Type of column must be integer, float or string.");
+					throw exception("Type of column must be integer, float or text.");
 				break;
 			case 2:
 				// stoi() transforms strings in integers
@@ -281,13 +281,12 @@ private:
 	}
 
 	void displayTable(smatch matches, TableBuffer tableBuffer) {
-
 		int size = tableBuffer.getNoTables();
 		Table* tables = tableBuffer.getTables();
 		string tableNameInput = matches[1].str();
 		for (int i = 0; i < size; i++) {
 			if (tableNameInput == tables[i].getName()) {
-				cout << tables[i];
+				
 				break;
 			}
 			else {
@@ -298,8 +297,45 @@ private:
 		delete[] tables;
 	}
 
-	void insertInto(smatch matches) {
-		return;
+	void insertInto(smatch matches, TableBuffer tableBuffer) {
+		// matches[1] =  table name
+		// matches[2] = ce e in paranteza
+
+		int size = tableBuffer.getNoTables();
+		Table* tables = tableBuffer.getTables();
+		string tableNameInput = matches[1].str();
+		Table foundTable;
+		for (int i = 0; i < size; i++) {
+			if (tableNameInput == tables[i].getName()) {
+				 foundTable = tables[i];
+				break;
+			}
+			else {
+				cout << endl << "There is no table with name: " << tableNameInput;
+				throw exception("\nError: Table not found.");
+			}
+		}
+		
+		regex partitionRegex("[^ ,][a-zA-Z0-9\"'”’\\s*]*");
+
+		smatch input;
+		string paranteza = matches[2].str();
+
+		auto words_begin = sregex_iterator(paranteza.begin(), paranteza.end(), partitionRegex);
+		auto words_end = sregex_iterator();
+
+		if (foundTable.getNoColumns() != distance(words_begin, words_end)) {
+			throw exception("\nError: You should insert as many values as the number of columns in that specific table.");
+		}
+
+		for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
+			std::smatch match = *i;
+			std::string match_str = match.str();
+			// aici avem nevoie de clasa row ca sa salvam informatiile
+			cout <<  endl << match_str;
+		}
+
+		delete[] tables;
 	}
 
 	void deleteFrom(smatch matches) {
