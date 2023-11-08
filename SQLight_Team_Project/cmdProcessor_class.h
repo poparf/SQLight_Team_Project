@@ -23,15 +23,15 @@ struct properFormats {
 // nu o sa arate formatul potrivit acum chiar daca scrii doar DIsplay TABLE de ex pt ca regex-urile
 // urmatoare nu au nimic scris
 struct regexList {
-	string fullCreateTable = "\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9]+)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]+\\s*,\\s*[A-Za-z]+\\s*,\\s*[0-9]+\\s*,\\s*[A-Za-z0-9]+\\s*\\)\\s*,?\\s*)+?)\\s*\\)";
-	string fullCreateIndex = "\\s*CREATE\\s+INDEX\\s*(IF\\s+NOT\\s+EXISTS)?\\s+([a-zA-Z0-9]+)\\s+ON\\s+([a-zA-Z0-9]+)\\s+\\((\\s*[a-zA-Z0-9]+)\\s*\\)";
-	string fullDropTable = "\\s*DROP\\s+TABLE\\s+([a-zA-Z0-9]+)\\s*";
-	string fullDropIndex = "\\s*DROP\\s+INDEX\\s+([a-zA-Z0-9]+)\\s*";
-	string fullDisplayTable = "\\s*DISPLAY\\s+TABLE\\s+([a-zA-Z0-9]*)\\s*";
-	string fullInsertInto = "\\s*INSERT\\s+INTO\\s+([a-zA-Z0-9]+)\\s+VALUES\s*\\(((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+)\\)\\s*";
-	string fullDeleteFrom = "\\s*DELETE\\s+FROM\\s+([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s+=\\s+([a-zA-Z0-9]+)\\s*";
-	string fullSelect = "\\s*SELECT\\s*((\\((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+\\))+|(ALL))\\s*FROM\\s+([a-zA-Z0-9]+)+\\s*(WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+))?";
-	string fullUpdate = "\\s*UPDATE\\s+([a-zA-Z0-9]+)\\s+SET\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+)\\s*";
+	string fullCreateTable = "^\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9]+)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]+\\s*,\\s*[A-Za-z]+\\s*,\\s*[0-9]+\\s*,\\s*[A-Za-z0-9\"'’]+\\s*\\)\\s*,?\\s*)+?)\\s*\\)$";
+	string fullCreateIndex = "^\\s*CREATE\\s+INDEX\\s*(IF\\s+NOT\\s+EXISTS)?\\s+([a-zA-Z0-9]+)\\s+ON\\s+([a-zA-Z0-9]+)\\s+\\((\\s*[a-zA-Z0-9]+)\\s*\\)$";
+	string fullDropTable = "^\\s*DROP\\s+TABLE\\s+([a-zA-Z0-9]+)\\s*$";
+	string fullDropIndex = "^\\s*DROP\\s+INDEX\\s+([a-zA-Z0-9]+)\\s*$";
+	string fullDisplayTable = "^\\s*DISPLAY\\s+TABLE\\s+([a-zA-Z0-9]*)\\s*$";
+	string fullInsertInto = "^\\s*INSERT\\s+INTO\\s+([a-zA-Z0-9]+)\\s+VALUES\s*\\(((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+)\\)\\s*$";
+	string fullDeleteFrom = "^\\s*DELETE\\s+FROM\\s+([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s+=\\s+([a-zA-Z0-9]+)\\s*$";
+	string fullSelect = "^\\s*SELECT\\s*((\\((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+\\))+|(ALL))\\s*FROM\\s+([a-zA-Z0-9]+)+\\s*(WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+))?$";
+	string fullUpdate = "^\\s*UPDATE\\s+([a-zA-Z0-9]+)\\s+SET\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+)\\s*$";
 };
 // pana aici
 class CmdProcessor
@@ -43,15 +43,15 @@ public:
 		properFormats formats;
 		regexList rlist;
 
-		regex ct("\\s*CREATE\\s+TABLE\\s*", regex::icase);
-		regex ci("\\s*CREATE\\s+INDEX\\s*", regex::icase);
-		regex dt("\\s*DROP\\s+TABLE\\s*", regex::icase);
-		regex di("\\s*DROP\\s+INDEX\\s*", regex::icase);
-		regex dplt("\\s*DISPLAY\\s+TABLE\\s*", regex::icase);
-		regex ii("\\s*INSERT\\s+INTO\\s*", regex::icase);
-		regex df("\\s*DELETE\\s+FROM\\s*", regex::icase);
-		regex st("\\s*SELECT\\s*", regex::icase);
-		regex ue("\\s*UPDATE\\s*", regex::icase);
+		regex ct("^\\s*CREATE\\s+TABLE\\s*", regex::icase);
+		regex ci("^\\s*CREATE\\s+INDEX\\s*", regex::icase);
+		regex dt("^\\s*DROP\\s+TABLE\\s*", regex::icase);
+		regex di("^\\s*DROP\\s+INDEX\\s*", regex::icase);
+		regex dplt("^\\s*DISPLAY\\s+TABLE\\s*", regex::icase);
+		regex ii("^\\s*INSERT\\s+INTO\\s*", regex::icase);
+		regex df("^\\s*DELETE\\s+FROM\\s*", regex::icase);
+		regex st("^\\s*SELECT\\s*", regex::icase);
+		regex ue("^\\s*UPDATE\\s*", regex::icase);
 
 		regex createTableRegex(rlist.fullCreateTable, regex::icase);
 		regex createIndexRegex(rlist.fullCreateIndex, regex::icase);
@@ -68,7 +68,7 @@ public:
 		if (regex_search(this->fullCmd, ct)) {
 
 			if (regex_search(this->fullCmd, matches, createTableRegex)) {
-				tableBuffer = tableBuffer + *this->createTable(matches);
+				tableBuffer = tableBuffer + this->createTable(matches);
 				return 1;
 			}
 			else {
@@ -112,7 +112,7 @@ public:
 		else if (regex_search(this->fullCmd, dplt)) {
 
 			if (regex_search(this->fullCmd, matches, displayTableRegex)) {
-				this->displayTable(matches);
+				this->displayTable(matches,tableBuffer);
 				return 1;
 			}
 			else {
@@ -184,22 +184,24 @@ public:
 	}
 
 private:
-	Table* createTable(smatch matches) {
-		regex partitionRegex("[^() ,][a-zA-Z0-9]*");
+	Table createTable(smatch matches) {
+		regex partitionRegex("[^() ,][a-zA-Z0-9’’|""|'']*");
 		smatch partitionMatches;
+
+
 
 		// matches[0] = toata comanda
 		// matches[1] = table name,
 		// matches[2] = if not exists asta daca am scris daca nu e ""
 		//  iar al patrulea input este doar ce este in paranteza (col_name, etc... )
 
-		if (matches[2] == "") {
-			// do smth
-		}
-		else {
+
+		if (matches[2] != "") {
 			// do smth cause IF NOT EXISTS was used
 			cout << endl << "IF NOT EXISTS USED.";
+
 		}
+		
 
 
 		string tableName = matches[1].str();
@@ -219,20 +221,22 @@ private:
 		int k = 0;
 		// aici nu putem folosi i pentru ca e de tipul regex iterator nu int
 		for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
+			
 			std::smatch match = *i;
 			std::string match_str = match.str();
-
 			switch (k) {
 			case 0:
 				columns[j].setColumnName(match_str);
 				break;
 			case 1:
-				if (toLowerCase(match_str) == "number")
-					columns[j].setType(columnTypes::NUMBER);
-				else if (toLowerCase(match_str) == "string")
-					columns[j].setType(columnTypes::STRING);
+				if (toLowerCase(match_str) == "integer")
+					columns[j].setType(columnTypes::INTEGER);
+				else if (toLowerCase(match_str) == "float")
+					columns[j].setType(columnTypes::FLOAT);
+				else if (toLowerCase(match_str) == "text")
+					columns[j].setType(columnTypes::TEXT);
 				else
-					throw exception("Type of column must be number or string.");
+					throw exception("Type of column must be integer, float or string.");
 				break;
 			case 2:
 				// stoi() transforms strings in integers
@@ -256,11 +260,10 @@ private:
 		}
 		// aici in viitor o sa avem o functie care sa salveze tabelul
 		// si in fisier 
-		//Table t(tableName, columns, j);
+		Table t(tableName, columns, j);
 		
-		Table* returnTable = new Table(tableName, columns, j);
-		cout << *returnTable;
-		return returnTable;
+		//Table* returnTable = new Table(tableName, columns, j);
+		return t;
 	}
 
 	// trebuie lucrat de aici in jos
@@ -269,6 +272,7 @@ private:
 	}
 
 	void dropTable(smatch matches) {
+		cout << matches.str();
 		return;
 	}
 
@@ -276,8 +280,22 @@ private:
 		return;
 	}
 
-	void displayTable(smatch matches) {
-		return;
+	void displayTable(smatch matches, TableBuffer tableBuffer) {
+
+		int size = tableBuffer.getNoTables();
+		Table* tables = tableBuffer.getTables();
+		string tableNameInput = matches[1].str();
+		for (int i = 0; i < size; i++) {
+			if (tableNameInput == tables[i].getName()) {
+				cout << tables[i];
+				break;
+			}
+			else {
+				cout << endl << "There is no table with name: " << tableNameInput;
+			}
+		}
+
+		delete[] tables;
 	}
 
 	void insertInto(smatch matches) {
