@@ -286,14 +286,14 @@ private:
 		string tableNameInput = matches[1].str();
 		for (int i = 0; i < size; i++) {
 			if (tableNameInput == tables[i].getName()) {
-				
-				break;
-			}
-			else {
-				cout << endl << "There is no table with name: " << tableNameInput;
+				cout << tables[i];
+				delete[] tables;
+				return;
 			}
 		}
-
+		
+		cout << endl << "There is no table with name: " << tableNameInput;
+	
 		delete[] tables;
 	}
 
@@ -328,13 +328,20 @@ private:
 			throw exception("\nError: You should insert as many values as the number of columns in that specific table.");
 		}
 
+		//Row row(foundTable);
+		string* data = new string[foundTable.getNoColumns()];
+		int j = 0;
 		for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
 			std::smatch match = *i;
 			std::string match_str = match.str();
-			// aici avem nevoie de clasa row ca sa salvam informatiile
-			cout <<  endl << match_str;
+
+			data[j++] = match_str;
 		}
 
+		// data e efectiv un array de string uri cu toate informatiile dinp aranteza. trb sa stochezi cumva
+
+		//row.insertData(data);
+		//foundTable.insertOneRow(row);
 		delete[] tables;
 	}
 

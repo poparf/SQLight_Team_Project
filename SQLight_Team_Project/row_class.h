@@ -6,11 +6,70 @@
 using namespace std;
 
 
-class Row {
-	int rowId = 0;
-	string* data = nullptr;
-public:
-	~Row() {
-		delete[] data;
-	}
-};
+// nu functioneaza asa
+
+
+//
+//class Row {
+//private:
+//	string* data = nullptr;
+//
+//	// mai gandeste te
+//	int noCols = 0;
+//public:
+//
+//	Row() {};
+//	void insertData(string* input) {
+//		// verificam lungimea prin regex deci nu mai e nevoie de validare aici
+//		delete[] data;
+//		this->data = new string[noCols];
+//
+//		for (int i = 0; i < noCols; i++) {
+//			this->data[i] = input[i];
+//		}
+//	}
+//
+//	//  constructor
+//	Row() {
+//
+//		// initializam valorile cu default value
+//		int noCols = table.getNoColumns();
+//
+//		this->data = new string[noCols];
+//
+//		Column* cols = table.getColumns();
+//		for (int i = 0; i < noCols; i++) {
+//			data[i] = cols[i].getDefaultValue();
+//		}
+//
+//		delete[] cols;
+//	}
+//
+//	//copy constructor
+//	Row(Row& right) {
+//		this->noCols = right.noCols;
+//		delete[] data;
+//		this->data = new string[noCols];
+//
+//		for (int i = 0; i < noCols; i++) {
+//			this->data[i] = right.data[i];
+//		}
+//	}
+//
+//	Row& operator=(Row& right) {
+//		this->noCols = right.noCols;
+//		delete[] data;
+//		this->data = new string[noCols];
+//
+//		for (int i = 0; i < noCols; i++) {
+//			this->data[i] = right.data[i];
+//		}
+//
+//		return *this;
+//	}
+//
+//	// destructor
+//	~Row() {
+//		delete[] data;
+//	}
+//};

@@ -9,14 +9,17 @@ using namespace std;
 
 class Table {
 private:
-	string name = " ";
+	string name = "";
 	Column* columns = nullptr;
 	int noColumns = 0;
-	Row* rows = nullptr;
-	int noRows = 0;
+	/*Row* rows = nullptr;
+	int noRows = 0;*/
+	// nu merge cu row trebuie matrice de string uri sau alta rezolvare daca aveti idee
+	string** data;
+	int noRows;
 public:
 	// pt tableBuffer
-	// in viitor nu va mai fi public si prin inheritance il vom putea folosi doar in tableBuffer
+	// in viitor vom folosi pointer catre un array de pointeri care ponteaza catre tabel tabel**
 	Table() {
 
 	}
@@ -32,13 +35,22 @@ public:
 		this->setName(inputName);
 	}
 
-	void insertOneRow(Row input) {
-		
-	}
+	//void insertOneRow(Row input) {
+	//	this->noRows++;
+	//	Row* cpyRows = new Row[this->noRows];
+	//	for (int i = 0; i < this->noRows - 1; i++) {
+	//		cpyRows[i] = this->rows[i];
+	//	}
+	//	cpyRows[this->noRows] = input;
 
-	void insertRows(Row* input) {
+	//	delete[] this->rows;
 
-	}
+	//	this->rows = cpyRows;
+	//}
+
+	//void insertRows(Row* input) {
+
+	//}
 
 	string getName() {
 		return this->name;
