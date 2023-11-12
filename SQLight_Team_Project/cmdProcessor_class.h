@@ -305,9 +305,10 @@ private:
 		Table* tables = tableBuffer.getTables();
 		string tableNameInput = matches[1].str();
 		Table foundTable;
-		for (int i = 0; i < size; i++) {
-			if (tableNameInput == tables[i].getName()) {
-				 foundTable = tables[i];
+		int k;
+		for (k = 0; k < size; k++) {
+			if (tableNameInput == tables[k].getName()) {
+				 foundTable = tables[k];
 				break;
 			}
 			else {
@@ -328,20 +329,18 @@ private:
 			throw exception("\nError: You should insert as many values as the number of columns in that specific table.");
 		}
 
-		//Row row(foundTable);
-		string* data = new string[foundTable.getNoColumns()];
+		string data[100];
 		int j = 0;
 		for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
-			std::smatch match = *i;
-			std::string match_str = match.str();
-
-			data[j++] = match_str;
+			smatch match = *i;
+			string match_str = match.str();
+			cout << endl << match_str;
+			data[j] = match_str;
+			j += 1;
 		}
 
-		// data e efectiv un array de string uri cu toate informatiile dinp aranteza. trb sa stochezi cumva
-
-		//row.insertData(data);
-		//foundTable.insertOneRow(row);
+		//tableBuffer.insertRowByName(data, tableNameInput);
+		foundTable.insertRow(data);
 		delete[] tables;
 	}
 
