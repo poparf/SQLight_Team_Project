@@ -286,14 +286,14 @@ private:
 		string tableNameInput = matches[1].str();
 		for (int i = 0; i < size; i++) {
 			if (tableNameInput == tables[i].getName()) {
-				
-				break;
-			}
-			else {
-				cout << endl << "There is no table with name: " << tableNameInput;
+				cout << tables[i];
+				delete[] tables;
+				return;
 			}
 		}
-
+		
+		cout << endl << "There is no table with name: " << tableNameInput;
+	
 		delete[] tables;
 	}
 
@@ -305,9 +305,10 @@ private:
 		Table* tables = tableBuffer.getTables();
 		string tableNameInput = matches[1].str();
 		Table foundTable;
-		for (int i = 0; i < size; i++) {
-			if (tableNameInput == tables[i].getName()) {
-				 foundTable = tables[i];
+		int k;
+		for (k = 0; k < size; k++) {
+			if (tableNameInput == tables[k].getName()) {
+				 foundTable = tables[k];
 				break;
 			}
 			else {
@@ -328,13 +329,18 @@ private:
 			throw exception("\nError: You should insert as many values as the number of columns in that specific table.");
 		}
 
+		string data[100];
+		int j = 0;
 		for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
-			std::smatch match = *i;
-			std::string match_str = match.str();
-			// aici avem nevoie de clasa row ca sa salvam informatiile
-			cout <<  endl << match_str;
+			smatch match = *i;
+			string match_str = match.str();
+			cout << endl << match_str;
+			data[j] = match_str;
+			j += 1;
 		}
 
+		//tableBuffer.insertRowByName(data, tableNameInput);
+		foundTable.insertRow(data);
 		delete[] tables;
 	}
 

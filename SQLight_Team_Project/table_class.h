@@ -3,22 +3,26 @@
 #include <string>
 #include "utils.h"
 #include "column_class.h"
-#include "row_class.h"
 
 using namespace std;
 
 class Table {
 private:
-	string name = " ";
+	string name = "";
 	Column* columns = nullptr;
 	int noColumns = 0;
-	Row* rows = nullptr;
+	string** data = nullptr;
 	int noRows = 0;
+	int rowsAvailable = 0;
+	int nextRow = 0;
 public:
-	// pt tableBuffer
-	// in viitor nu va mai fi public si prin inheritance il vom putea folosi doar in tableBuffer
 	Table() {
+		this->noRows = 100;
+		this->data = new string*[this->noRows];
+		this->rowsAvailable = 100;
 
+		for (int i = 0; i < this->noRows; i++)
+			this->data[i] = new string[this->noColumns];
 	}
 
 	Table(string inputName, Column* inputColumns, int inputNoColumns) {
@@ -30,14 +34,26 @@ public:
 		}
 
 		this->setName(inputName);
+
+		this->noRows = 100;
+		this->data = new string*[this->noRows];
+		this->rowsAvailable = 100;
+
+		for (int i = 0; i < this->noRows; i++)
+			this->data[i] = new string[this->noColumns];
 	}
 
-	void insertOneRow(Row input) {
+	void insertRow(string* input) {
 		
-	}
-
-	void insertRows(Row* input) {
-
+		if (this->rowsAvailable == 0) {
+			this->doubleSpace();
+		}
+		for (int i = 0; i < this->noColumns; i++) {
+			this->data[this->nextRow][i] = input[i];
+		}
+		
+		this->nextRow += 1;
+		this->rowsAvailable -= 1;
 	}
 
 	string getName() {
@@ -77,6 +93,26 @@ public:
 		this->columns = newCols;
 
 		this->noColumns = table.noColumns;
+
+
+		this->noRows = table.noRows;
+		this->rowsAvailable = table.rowsAvailable;
+		this->nextRow = table.nextRow;
+
+		string** newData = new string * [table.noRows];
+		for (int i = 0; i < table.noRows; i++) {
+			newData[i] = new string[table.noColumns];
+		}
+
+		for (int i = 0; i < table.noRows; i++) {
+			for (int j = 0; j < table.noColumns; j++) {
+				newData[i][j] = table.data[i][j];
+			}
+		}
+
+		for (int i = 0; i < table.noRows; i++) {
+			this->data[i] = newData[i];
+		}
 	}
 
 	Table(Table& table) {
@@ -89,10 +125,61 @@ public:
 		this->columns = newCols;
 
 		this->noColumns = table.noColumns;
+
+		this->noRows = table.noRows;
+		this->rowsAvailable = table.rowsAvailable;
+		this->nextRow = table.nextRow;
+
+		string** newData = new string*[table.noRows];
+		for (int i = 0; i < table.noRows; i++) {
+			newData[i] = new string[table.noColumns];
+		}
+
+		for (int i = 0; i < table.noRows; i++) {
+			for (int j = 0; j < table.noColumns; j++) {
+				newData[i][j] = table.data[i][j];
+			}
+		}
+
+		for (int i = 0; i < table.noRows; i++) {
+			this->data[i] = newData[i];
+		}
 	}
 
 	~Table() {
 		delete[] this->columns;
+
+		for (int i = 0; i < this->noRows; i++) {
+			delete[] this->data[i];
+		}
+		delete[] this->data;
+	}
+private:
+	void doubleSpace() {
+		string** newData = new string * [this->noRows * 2];
+
+		for (int i = 0; i < this->noRows * 2; i++) {
+			newData[i] = new string[this->noColumns];
+		}
+
+		for (int i = 0; i < this->noRows; i++) {
+			for (int j = 0; j < this->noColumns; j++) {
+				newData[i][j] = this->data[i][j];
+			}
+		}
+
+		this->nextRow = this->noRows + 1;
+		this->noRows *= 2;
+		this->rowsAvailable = this->noRows / 2;
+
+		for (int i = 0; i < this->noRows; i++) {
+			delete[] this->data[i];
+		}
+		delete[] this->data;
+
+		for (int i = 0; i < this->noRows; i++) {
+			this->data[i] = newData[i];
+		}
 	}
 };
 
@@ -116,6 +203,15 @@ public:
 
 	}
 
+
+	void insertRowByName(string* data, string tableName) {
+		for (int i = 0; i < noTables; i++) {
+			if (this->tables[i].getName() == tableName) {
+				this->tables[i].insertRow(data);
+				break;
+			}
+		}
+	}
 
 	Table* getTables() {
 		Table* newTables = new Table[this->noTables];
@@ -181,10 +277,7 @@ public:
 
 	}
 
-	// daca nu l las asa si pun
-	// delete[] tables;
-	// imi sterge toate coloanele si toate tabelele
 	~TableBuffer() {
-		
+		delete[] this->tables;
 	}
 };
