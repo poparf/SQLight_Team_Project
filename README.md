@@ -2,8 +2,6 @@
 
 **TODO**
 
- 1. TableBuffer e buguit.. momentan nu merge
-
-
-Numele sunt puse cam prost
-in project/project e main iar in SQLight_team_project sunt headerele
+ 1. Nu se salveaza datele in tabel in matricea data
+ 2. trebuie sa se afiseze mesaj personalizat in functie de unde s-a gresit la comanda
+ 3. trebuie sa se puna validari la fiecare setter..
