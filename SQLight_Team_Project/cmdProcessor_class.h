@@ -19,21 +19,19 @@ struct properFormats {
 	string properSt = "SELECT (at_least_one_column, ...) | ALL FROM table_name [WHERE column_name = value] - the where clause is optional";
 	string properUe = "UPDATE table_name SET column_name = value WHERE  column_name = value (the SET column may be different than the WHERE one)";
 };
-// se pun aici regex-urile pt ca sunt foarte lungi si nu se intelege
-// nu o sa arate formatul potrivit acum chiar daca scrii doar DIsplay TABLE de ex pt ca regex-urile
-// urmatoare nu au nimic scris
+
 struct regexList {
-	string fullCreateTable = "^\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9]+)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]+\\s*,\\s*[A-Za-z]+\\s*,\\s*[0-9]+\\s*,\\s*[A-Za-z0-9\"'’]+\\s*\\)\\s*,?\\s*)+?)\\s*\\)$";
+	string fullCreateTable = "^\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9]+)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]+\\s*,\\s*[A-Za-z]+\\s*,\\s*[0-9]+\\s*,\\s*[A-Za-z0-9\"'’”]+\\s*\\)\\s*,?\\s*)+?)\\s*\\)$";
 	string fullCreateIndex = "^\\s*CREATE\\s+INDEX\\s*(IF\\s+NOT\\s+EXISTS)?\\s+([a-zA-Z0-9]+)\\s+ON\\s+([a-zA-Z0-9]+)\\s+\\((\\s*[a-zA-Z0-9]+)\\s*\\)$";
 	string fullDropTable = "^\\s*DROP\\s+TABLE\\s+([a-zA-Z0-9]+)\\s*$";
 	string fullDropIndex = "^\\s*DROP\\s+INDEX\\s+([a-zA-Z0-9]+)\\s*$";
 	string fullDisplayTable = "^\\s*DISPLAY\\s+TABLE\\s+([a-zA-Z0-9]*)\\s*$";
 	string fullInsertInto = "^\\s*INSERT\\s+INTO\\s+([a-zA-Z0-9]+)\\s+VALUES\\s*\\(((\\s*[a-zA-Z0-9\"'’”]+\\s*,?\\s*)+)\\)\\s*$";
-	string fullDeleteFrom = "^\\s*DELETE\\s+FROM\\s+([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s+=\\s+([a-zA-Z0-9]+)\\s*$";
+	string fullDeleteFrom = "^\\s*DELETE\\s+FROM\\s+([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s+=\\s+([a-zA-Z0-9\"'’”]+)\\s*$";
 	string fullSelect = "^\\s*SELECT\\s*((\\((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+\\))+|(ALL))\\s*FROM\\s+([a-zA-Z0-9]+)+\\s*(WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+))?$";
-	string fullUpdate = "^\\s*UPDATE\\s+([a-zA-Z0-9]+)\\s+SET\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+)\\s*$";
+	string fullUpdate = "^\\s*UPDATE\\s+([a-zA-Z0-9]+)\\s+SET\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9\"'’”]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9\"'’”]+)\\s*$";
 };
-// pana aici
+
 class CmdProcessor
 {
 private:
@@ -188,32 +186,26 @@ private:
 		regex partitionRegex("[^ ,()][a-zA-Z0-9\"'”’\\s*]*");
 		smatch partitionMatches;
 
-
-
 		// matches[0] = toata comanda
 		// matches[1] = table name,
 		// matches[2] = if not exists asta daca am scris daca nu e ""
 		//  iar al patrulea input este doar ce este in paranteza (col_name, etc... )
 
-
 		if (matches[2] != "") {
 			// do smth cause IF NOT EXISTS was used
 			cout << endl << "IF NOT EXISTS USED.";
-
 		}
 		
-
-
 		string tableName = matches[1].str();
 		string beforePartition = matches[3].str();
 
-		auto words_begin =
-			std::sregex_iterator(beforePartition.begin(), beforePartition.end(), partitionRegex);
-		auto words_end = std::sregex_iterator();
+		auto words_begin = sregex_iterator(beforePartition.begin(), beforePartition.end(), partitionRegex);
+		auto words_end = sregex_iterator();
 
 		// de ce am impartit la 4 ?
-		// pt ca in fiecare paranteza sunt cate 4 valori
-		// noi vrem sa creeam cate o coloana pt fiecare paranteza iar fiecare coloana are atribuite cate 4 valori
+		// pentru ca in fiecare paranteza sunt cate 4 valori
+		// noi vrem sa creeam cate o coloana pt fiecare paranteza
+		// iar fiecare coloana are atribuite cate 4 valori
 		int noColumns = distance(words_begin, words_end) / 4;
 		Column* columns = new Column[noColumns];
 
@@ -259,10 +251,9 @@ private:
 			}
 		}
 		// aici in viitor o sa avem o functie care sa salveze tabelul
-		// si in fisier 
+		// si in fisier
 		Table t(tableName, columns, j);
 		
-		//Table* returnTable = new Table(tableName, columns, j);
 		return t;
 	}
 
@@ -339,8 +330,7 @@ private:
 			j += 1;
 		}
 
-		//tableBuffer.insertRowByName(data, tableNameInput);
-		foundTable.insertRow(data);
+		tableBuffer.insertRowByName(data, tableNameInput);
 		delete[] tables;
 	}
 

@@ -43,7 +43,7 @@ public:
 			this->data[i] = new string[this->noColumns];
 	}
 
-	void insertRow(string* input) {
+	void insertRow(string input[100]) {
 		
 		if (this->rowsAvailable == 0) {
 			this->doubleSpace();
@@ -90,6 +90,7 @@ public:
 		for (int i = 0; i < table.noColumns; i++) {
 			newCols[i] = table.columns[i];
 		}
+		delete[] this->columns;
 		this->columns = newCols;
 
 		this->noColumns = table.noColumns;
@@ -99,23 +100,28 @@ public:
 		this->rowsAvailable = table.rowsAvailable;
 		this->nextRow = table.nextRow;
 
-		string** newData = new string * [table.noRows];
+		for (int i = 0; i < this->noRows; i++) {
+			delete[] this->data[i];
+		}
+		delete[] this->data;
+
+		data = new string * [table.noRows];
 		for (int i = 0; i < table.noRows; i++) {
-			newData[i] = new string[table.noColumns];
+			data[i] = new string[table.noColumns];
 		}
 
 		for (int i = 0; i < table.noRows; i++) {
 			for (int j = 0; j < table.noColumns; j++) {
-				newData[i][j] = table.data[i][j];
+				data[i][j] = table.data[i][j];
 			}
-		}
-
-		for (int i = 0; i < table.noRows; i++) {
-			this->data[i] = newData[i];
 		}
 	}
 
-	Table(Table& table) {
+	int getNoRows() {
+		return this->noRows;
+	}
+
+	Table(const Table& table) {
 		this->name = table.name;
 		
 		Column* newCols = new Column[table.noColumns];
@@ -130,19 +136,17 @@ public:
 		this->rowsAvailable = table.rowsAvailable;
 		this->nextRow = table.nextRow;
 
-		string** newData = new string*[table.noRows];
+		//memcpy(this->data, table.data, table.noRows * table.noColumns * sizeof(string));
+
+		data = new string * [table.noRows];
 		for (int i = 0; i < table.noRows; i++) {
-			newData[i] = new string[table.noColumns];
+			data[i] = new string[table.noColumns];
 		}
 
 		for (int i = 0; i < table.noRows; i++) {
 			for (int j = 0; j < table.noColumns; j++) {
-				newData[i][j] = table.data[i][j];
+				data[i][j] = table.data[i][j];
 			}
-		}
-
-		for (int i = 0; i < table.noRows; i++) {
-			this->data[i] = newData[i];
 		}
 	}
 
@@ -154,6 +158,8 @@ public:
 		}
 		delete[] this->data;
 	}
+
+	friend void operator<<(ostream& console, Table t);
 private:
 	void doubleSpace() {
 		string** newData = new string * [this->noRows * 2];
@@ -191,6 +197,17 @@ void operator<<(ostream& console, Table t) {
 	for (int i = 0; i < t.getNoColumns(); i++) {
 		console << columns[i];
 	}
+
+	cout << endl << "~~~~~~~~~~~~~~~~";
+	cout << endl << "~~~~ DATA ~~~~~~";
+	cout << endl << "~~~~~~~~~~~~~~~~";
+
+	for (int i = 0; i < t.nextRow; i++) {
+		cout << "\n";
+		for (int j = 0; j < t.noColumns; j++) {
+			cout << t.data[i][j] << " ";
+		}
+	}
 	delete[] columns;
 }
 
@@ -203,8 +220,7 @@ public:
 
 	}
 
-
-	void insertRowByName(string* data, string tableName) {
+	void insertRowByName(string data[100], string tableName) {
 		for (int i = 0; i < noTables; i++) {
 			if (this->tables[i].getName() == tableName) {
 				this->tables[i].insertRow(data);
@@ -236,7 +252,7 @@ public:
 		this->noTables = tableBuffer.noTables; 
 		this->tables = new Table[tableBuffer.noTables];
 		for (int i = 0; i < tableBuffer.noTables; i++) {
-			this->tables[i] = tableBuffer.tables[i]; // Make a deep copy of each table
+			this->tables[i] = tableBuffer.tables[i];
 		}
 	}
 
