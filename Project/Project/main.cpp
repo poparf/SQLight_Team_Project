@@ -7,7 +7,6 @@
 
 using namespace std;
 
-
 int main() {
 	CmdProcessor buffer;
 	properFormats formats;

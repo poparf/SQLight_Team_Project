@@ -66,10 +66,14 @@ public:
 
 	void setName(string input) {
 		// validare: daca exista un table cu acelasi dam throw
+
 		this->name = input;
 	}
 
 	void setNoColumns(int input) {
+		if (input < 0) {
+			throw exception("Number of columns must be positive.");
+		}
 		this->noColumns = input;
 	}
 
@@ -220,6 +224,15 @@ public:
 
 	}
 
+	bool doesTableExist(string input) {
+		for (int i = 0; i < noTables; i++) {
+			if (tables[i].getName() == input) {
+				return 1;
+			}
+		}
+		return 0;
+	}
+
 	void insertRowByName(string data[100], string tableName) {
 		for (int i = 0; i < noTables; i++) {
 			if (this->tables[i].getName() == tableName) {
@@ -239,13 +252,6 @@ public:
 
 	int getNoTables() {
 		return this->noTables;
-	}
-
-	void setNoTables(int input) {
-		if (input < 0) {
-			throw exception("Number of tables must be positive or 0.");
-		}
-		this->noTables = input;
 	}
 
 	TableBuffer(const TableBuffer& tableBuffer) {

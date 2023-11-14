@@ -66,7 +66,7 @@ public:
 		if (regex_search(this->fullCmd, ct)) {
 
 			if (regex_search(this->fullCmd, matches, createTableRegex)) {
-				tableBuffer = tableBuffer + this->createTable(matches);
+				tableBuffer = tableBuffer + this->createTable(matches, tableBuffer);
 				return 1;
 			}
 			else {
@@ -182,7 +182,7 @@ public:
 	}
 
 private:
-	Table createTable(smatch matches) {
+	Table createTable(smatch matches, TableBuffer& tableBuffer) {
 		regex partitionRegex("[^ ,()][a-zA-Z0-9\"'”’\\s*]*");
 		smatch partitionMatches;
 
@@ -190,13 +190,16 @@ private:
 		// matches[1] = table name,
 		// matches[2] = if not exists asta daca am scris daca nu e ""
 		//  iar al patrulea input este doar ce este in paranteza (col_name, etc... )
-
-		if (matches[2] != "") {
-			// do smth cause IF NOT EXISTS was used
-			cout << endl << "IF NOT EXISTS USED.";
-		}
 		
 		string tableName = matches[1].str();
+
+		if (matches[2] != "") {
+			cout << endl << "IF NOT EXISTS USED.";
+			if (tableBuffer.doesTableExist(tableName)) {
+				throw exception("Another table found with the same name.");
+			}
+		}
+
 		string beforePartition = matches[3].str();
 
 		auto words_begin = sregex_iterator(beforePartition.begin(), beforePartition.end(), partitionRegex);
