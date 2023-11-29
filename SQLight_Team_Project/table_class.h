@@ -11,6 +11,7 @@ private:
 	string name = "";
 	Column* columns = nullptr;
 	int noColumns = 0;
+
 	string** data = nullptr;
 	int noRows = 0;
 	int rowsAvailable = 0;
@@ -43,8 +44,7 @@ public:
 			this->data[i] = new string[this->noColumns];
 	}
 
-	void insertRow(string input[100]) {
-		
+	void insertRow(string* input) {
 		if (this->rowsAvailable == 0) {
 			this->doubleSpace();
 		}
@@ -233,8 +233,8 @@ public:
 		return 0;
 	}
 
-	void insertRowByName(string data[100], string tableName) {
-		for (int i = 0; i < noTables; i++) {
+	void insertRowByName(string* data, string tableName) {
+		for (int i = 0; i < this->noTables; i++) {
 			if (this->tables[i].getName() == tableName) {
 				this->tables[i].insertRow(data);
 				break;

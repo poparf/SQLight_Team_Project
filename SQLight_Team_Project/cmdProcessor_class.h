@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "column_class.h"
 #include "table_class.h"
+#include <fstream>
 using namespace std;
 
 
@@ -167,6 +168,19 @@ public:
 		return 0;
 	}
 
+	void insertCommands(TableBuffer tableBuffer) {
+		ifstream comenzi("comenzi.txt");
+		string comanda;
+		if (comenzi.is_open()) {
+			while (getline(comenzi, comanda)) {
+				this->fullCmd = comanda;
+				this->checkCmd(tableBuffer);
+			}
+			comenzi.close();
+		}
+	}
+
+
 	void setFullCmd() {
 		getline(cin, this->fullCmd);
 
@@ -291,7 +305,7 @@ private:
 		delete[] tables;
 	}
 
-	void insertInto(smatch matches, TableBuffer tableBuffer) {
+	void insertInto(smatch matches, TableBuffer& tableBuffer) {
 		// matches[1] =  table name
 		// matches[2] = ce e in paranteza
 
@@ -323,7 +337,7 @@ private:
 			throw exception("\nError: You should insert as many values as the number of columns in that specific table.");
 		}
 
-		string data[100];
+		string* data = new string[foundTable.getNoColumns()];
 		int j = 0;
 		for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
 			smatch match = *i;
