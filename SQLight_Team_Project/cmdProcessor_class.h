@@ -168,16 +168,23 @@ public:
 		return 0;
 	}
 
-	void insertCommands(TableBuffer tableBuffer) {
+	void insertCommands(TableBuffer& tableBuffer) {
 		ifstream comenzi("comenzi.txt");
 		string comanda;
-		if (comenzi.is_open()) {
-			while (getline(comenzi, comanda)) {
-				this->fullCmd = comanda;
-				this->checkCmd(tableBuffer);
+		try {
+			if (comenzi.is_open()) {
+				while (getline(comenzi, comanda)) {
+					this->fullCmd = comanda;
+
+					this->checkCmd(tableBuffer);
+				}
+				comenzi.close();
 			}
-			comenzi.close();
 		}
+		catch (exception& e) {
+			cout << endl << e.what();
+		 }
+		
 	}
 
 
@@ -348,6 +355,7 @@ private:
 		}
 
 		tableBuffer.insertRowByName(data, tableNameInput);
+		delete[] data;
 		delete[] tables;
 	}
 
