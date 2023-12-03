@@ -12,6 +12,9 @@ private:
 	Column* columns = nullptr;
 	int noColumns = 0;
 
+	// Question: Este ok asa ? 
+	// Am incercat sa fac cu o clasa Row dar depindea de
+	// informatii din clasa Column.
 	string** data = nullptr;
 	int noRows = 0;
 	int rowsAvailable = 0;
@@ -58,6 +61,24 @@ public:
 
 	string getName() {
 		return this->name;
+	}
+
+	string** getData() {
+		// trimited doar nr real de data
+		int rows = this->nextRow - 1;
+		string** newData = new string*[rows];
+
+		for (int i = 0; i < rows; i++) {
+			newData[i] = new string[this->noColumns];
+		}
+
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < this->noColumns; j++) {
+				newData[i][j] = this->data[i][j];
+			}
+		}
+
+		return newData;
 	}
 
 	int getNoColumns() {

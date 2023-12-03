@@ -13,6 +13,13 @@ protected:
 
 public:
 	Document(string fileName) : fileName(fileName) {
+	// ce pun aici ?
+	
+	}
+
+	~Document() {
+		inFile.close();
+		outFile.close();
 	}
 };
 
@@ -34,8 +41,10 @@ public:
 			throw exception("File couldn't be opened.");
 		}
 	}
+	
 
-	void writeTable(Table writeTable) {
+	// Folosita la create table
+	void writeTable(Table& writeTable) {
 		// Convention to write into the file as follows:
 		// no of columns
 		// no of rows
@@ -69,9 +78,38 @@ public:
 			int colType = inputCols[i].getType();
 			outFile.write((char*)colType, sizeof(int));
 
-			//
+			// Maximum size of the column
+			size_t colMaxSize = inputCols[i].getSize();
+			outFile.write((char*)colMaxSize, sizeof(colMaxSize));
 
+			// The default value
+			string colDefValue = inputCols[i].getDefaultValue();
+			int defSize = colDefValue.size();
+			outFile.write((char*)defSize, sizeof(defSize));
+			outFile.write(colDefValue.c_str(), defSize);
 		}
+	}
+
+	// Folosita la insert
+	// Chiar daca fac amortizarea ar trebui sa scriu in fisier
+	// numarul real de rows. adica la fiecare insert sa apelez
+	// functia aceasta:
+	void writeRows(Table& writeTable) {
+		// Question: Daca am pentru tabel 
+		// un size maximum pt fiecare string salvat
+		// ar trebui sa salvez fiecare string
+		// cu size ul default chiar daca are mai putin ?
+		// Pot face cumva ca sa maresc viteaza
+		// sa nu trimit de fiecare data o copie?
+		// sa am acces la data dar sa nu pot schimba
+		// poate daca am tine matricea cu data in
+		// aceasta clasa si astfel apelam getData()
+		// doar o data in constructor
 	}
 };
 
+
+
+// Alte intrebari:
+// De ce da crash cand scriu peste 100 de rows.
+// Este de la functia doubleSpace? Este copy constructor sau operator =?
