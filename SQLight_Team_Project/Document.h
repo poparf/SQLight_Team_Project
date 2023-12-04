@@ -68,28 +68,28 @@ public:
 		Column* inputCols = writeTable.getColumns();
 		int noCols = writeTable.getNoColumns();
 		int noRows = writeTable.getNoRows();
-		outFile.write((char*)noCols, sizeof(int));
-		outFile.write((char*)noRows, sizeof(int));
+		outFile.write((char*)&noCols, sizeof(int));
+		outFile.write((char*)&noRows, sizeof(int));
 
 		for (int i = 0; i < noCols; i++) {
 			// ColumnName type string
 			string colName = inputCols[i].getColumnName();
 			int colNameSize = colName.size();
-			outFile.write((char*)colNameSize, sizeof(colNameSize));
+			outFile.write((char*)&colNameSize, sizeof(colNameSize));
 			outFile.write(colName.c_str(), colNameSize);
 			
 			// Type of the column written as int INT  - 0 FLOAT - 1 TEXT -2
 			int colType = inputCols[i].getType();
-			outFile.write((char*)colType, sizeof(int));
+			outFile.write((char*)&colType, sizeof(int));
 
 			// Maximum size of the column
 			int colMaxSize = inputCols[i].getSize();
-			outFile.write((char*)colMaxSize, sizeof(colMaxSize));
+			outFile.write((char*)&colMaxSize, sizeof(colMaxSize));
 
 			// The default value
 			string colDefValue = inputCols[i].getDefaultValue();
 			int defSize = colDefValue.size();
-			outFile.write((char*)defSize, sizeof(defSize));
+			outFile.write((char*)&defSize, sizeof(defSize));
 			outFile.write(colDefValue.c_str(), defSize);
 		}
 
