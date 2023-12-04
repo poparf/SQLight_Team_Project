@@ -5,7 +5,7 @@
 #include "cmdProcessor_class.h"
 #include "table_class.h"
 #include <fstream>
-
+#include "Document.h"
 using namespace std;
 
 int main() {

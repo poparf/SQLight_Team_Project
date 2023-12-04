@@ -63,6 +63,10 @@ public:
 		return this->name;
 	}
 
+	int getNextRow() {
+		return this->nextRow;
+	}
+
 	string** getData() {
 		// trimited doar nr real de data
 		int rows = this->nextRow - 1;

@@ -6,6 +6,7 @@
 #include "column_class.h"
 #include "table_class.h"
 #include <fstream>
+#include "Document.h"
 using namespace std;
 
 
@@ -277,7 +278,8 @@ private:
 		// aici in viitor o sa avem o functie care sa salveze tabelul
 		// si in fisier
 		Table t(tableName, columns, j);
-		
+		BinDocument file(tableName + ".bin");
+		file.writeTable(t);
 		return t;
 	}
 
@@ -355,6 +357,9 @@ private:
 		}
 
 		tableBuffer.insertRowByName(data, tableNameInput);
+		BinDocument doc(tableNameInput + ".bin");
+		doc.writeRows(data, foundTable);
+
 		delete[] data;
 		delete[] tables;
 	}

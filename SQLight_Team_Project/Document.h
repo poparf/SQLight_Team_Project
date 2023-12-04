@@ -4,6 +4,8 @@
 #include "table_class.h"
 using namespace std;
 
+
+// trebuia sa scriu doar declaratia si fnctia in sine in cpp
 class Document
 {
 protected:
@@ -34,6 +36,8 @@ class CsvDocument : public Document {
 };
 
 class BinDocument : public Document {
+private:
+
 public:
 	BinDocument(string binName) : Document(binName) {
 		outFile.open(this->fileName, ios::app | ios::binary);
@@ -70,7 +74,7 @@ public:
 		for (int i = 0; i < noCols; i++) {
 			// ColumnName type string
 			string colName = inputCols[i].getColumnName();
-			size_t colNameSize = colName.size();
+			int colNameSize = colName.size();
 			outFile.write((char*)colNameSize, sizeof(colNameSize));
 			outFile.write(colName.c_str(), colNameSize);
 			
@@ -79,7 +83,7 @@ public:
 			outFile.write((char*)colType, sizeof(int));
 
 			// Maximum size of the column
-			size_t colMaxSize = inputCols[i].getSize();
+			int colMaxSize = inputCols[i].getSize();
 			outFile.write((char*)colMaxSize, sizeof(colMaxSize));
 
 			// The default value
@@ -88,28 +92,38 @@ public:
 			outFile.write((char*)defSize, sizeof(defSize));
 			outFile.write(colDefValue.c_str(), defSize);
 		}
+
+		delete[] inputCols;
 	}
 
 	// Folosita la insert
 	// Chiar daca fac amortizarea ar trebui sa scriu in fisier
 	// numarul real de rows. adica la fiecare insert sa apelez
 	// functia aceasta:
-	void writeRows(Table& writeTable) {
-		// Question: Daca am pentru tabel 
-		// un size maximum pt fiecare string salvat
-		// ar trebui sa salvez fiecare string
-		// cu size ul default chiar daca are mai putin ?
-		// Pot face cumva ca sa maresc viteaza
-		// sa nu trimit de fiecare data o copie?
-		// sa am acces la data dar sa nu pot schimba
-		// poate daca am tine matricea cu data in
-		// aceasta clasa si astfel apelam getData()
-		// doar o data in constructor
+	void writeRows(string* data, Table& table) {
+	
+		Column* cols = table.getColumns();
+		int noCols = table.getNoColumns();
+		int defSize;
+
+		for (int i = 0; i < noCols; i++) {
+			defSize = cols[i].getSize();
+			this->outFile.write(data[i].c_str(), defSize);
+		}
+		delete[] cols;
 	}
 };
 
 
 
-// Alte intrebari:
+// Intrebari
+// Am inclus gresit fisierele ?
+// Trebuia sa scriu doar declaratiile in header si functia in sine in cpp ?
+// Ce ar trebui sa scriu in clasa parinte Document?
+//  Este okay conventia pe care am ales o la fisierul binar ?
+// Chiar daca fac amortizarea pot sa scriu in fisier numarul real de randuri nu ?
+// Cand scriu data din tabel in fisier data de pe rows cu ce size ar trebui sa o pun ?
+// Cu maximum size si sa scriu posibil biti in plus degeaba? altfel nu stiu cum as putea citi
 // De ce da crash cand scriu peste 100 de rows.
 // Este de la functia doubleSpace? Este copy constructor sau operator =?
+// Cum sterg corect o matrice alocata dinamic ? e de ajuns delete[] matrix?
