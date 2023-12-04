@@ -178,18 +178,19 @@ private:
 			}
 		}
 
+		for (int i = 0; i < this->noRows; i++) {
+			delete[] this->data[i];
+		}
+		delete[] this->data;
+		
 		this->nextRow = this->noRows + 1;
 		this->noRows *= 2;
 		this->rowsAvailable = this->noRows / 2;
 
 		for (int i = 0; i < this->noRows; i++) {
-			delete[] this->data[i];
-		}
-		delete[] this->data;
-
-		for (int i = 0; i < this->noRows; i++) {
 			this->data[i] = newData[i];
 		}
+		this->data = newData;
 	}
 };
 

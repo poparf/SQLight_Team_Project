@@ -169,7 +169,7 @@ public:
 	}
 
 	void insertCommands(TableBuffer tableBuffer) {
-		ifstream comenzi("comenzi.txt");
+		ifstream comenzi("comenzi2.txt");
 		string comanda;
 		if (comenzi.is_open()) {
 			while (getline(comenzi, comanda)) {
@@ -342,7 +342,7 @@ private:
 		for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
 			smatch match = *i;
 			string match_str = match.str();
-			cout << endl << match_str;
+			//cout << endl << match_str;
 			data[j] = match_str;
 			j += 1;
 		}
