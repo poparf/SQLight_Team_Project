@@ -120,7 +120,6 @@ public:
 			}
 		}
 		else if (regex_search(this->fullCmd, ii)) {
-
 			if (regex_search(this->fullCmd, matches, insertIntoRegex)) {
 				this->insertInto(matches, tableBuffer);
 				return 1;
@@ -167,7 +166,7 @@ public:
 
 		return 0;
 	}
-
+	
 	void insertCommands(TableBuffer tableBuffer) {
 		ifstream comenzi("comenzi2.txt");
 		string comanda;
@@ -348,7 +347,7 @@ private:
 		}
 
 		tableBuffer.insertRowByName(data, tableNameInput);
-		delete[] tables;
+		delete[] tables; // aici
 	}
 
 	void deleteFrom(smatch matches) {

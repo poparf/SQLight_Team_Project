@@ -164,10 +164,10 @@ public:
 	}
 
 	friend void operator<<(ostream& console, Table t);
-private:
+public:
 	void doubleSpace() {
 		string** newData = new string * [this->noRows * 2];
-
+		
 		for (int i = 0; i < this->noRows * 2; i++) {
 			newData[i] = new string[this->noColumns];
 		}
@@ -185,7 +185,7 @@ private:
 		
 		this->nextRow = this->noRows + 1;
 		this->noRows *= 2;
-		this->rowsAvailable = this->noRows / 2;
+		this->rowsAvailable = this->noRows - this->nextRow;
 
 		for (int i = 0; i < this->noRows; i++) {
 			this->data[i] = newData[i];
