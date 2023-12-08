@@ -4,13 +4,21 @@
 #include "utils.h"
 #include "cmdProcessor_class.h"
 #include "table_class.h"
-
+#include <fstream>
+#include "Document.h"
 using namespace std;
 
 int main() {
 	CmdProcessor buffer;
 	properFormats formats;
 	TableBuffer tableBuffer;
+	try {
+		buffer.insertCommands(tableBuffer);
+	}
+	catch (exception& e) {
+		cout << endl << e.what();
+	}
+	
 
 	while (1) {
 		printLine();

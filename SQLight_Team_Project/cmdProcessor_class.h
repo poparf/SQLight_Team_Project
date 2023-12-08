@@ -5,6 +5,8 @@
 #include "utils.h"
 #include "column_class.h"
 #include "table_class.h"
+#include <fstream>
+#include "Document.h"
 using namespace std;
 
 
@@ -167,6 +169,26 @@ public:
 		return 0;
 	}
 
+	void insertCommands(TableBuffer& tableBuffer) {
+		ifstream comenzi("comenzi.txt");
+		string comanda;
+		try {
+			if (comenzi.is_open()) {
+				while (getline(comenzi, comanda)) {
+					this->fullCmd = comanda;
+
+					this->checkCmd(tableBuffer);
+				}
+				comenzi.close();
+			}
+		}
+		catch (exception& e) {
+			cout << endl << e.what();
+		 }
+		
+	}
+
+
 	void setFullCmd() {
 		getline(cin, this->fullCmd);
 
@@ -256,7 +278,8 @@ private:
 		// aici in viitor o sa avem o functie care sa salveze tabelul
 		// si in fisier
 		Table t(tableName, columns, j);
-		
+		BinDocument file(tableName + ".bin");
+		file.writeTable(t);
 		return t;
 	}
 
@@ -291,7 +314,7 @@ private:
 		delete[] tables;
 	}
 
-	void insertInto(smatch matches, TableBuffer tableBuffer) {
+	void insertInto(smatch matches, TableBuffer& tableBuffer) {
 		// matches[1] =  table name
 		// matches[2] = ce e in paranteza
 
@@ -323,7 +346,7 @@ private:
 			throw exception("\nError: You should insert as many values as the number of columns in that specific table.");
 		}
 
-		string data[100];
+		string* data = new string[foundTable.getNoColumns()];
 		int j = 0;
 		for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
 			smatch match = *i;
@@ -334,6 +357,10 @@ private:
 		}
 
 		tableBuffer.insertRowByName(data, tableNameInput);
+		BinDocument doc(tableNameInput + ".bin");
+		doc.writeRows(data, foundTable);
+
+		delete[] data;
 		delete[] tables;
 	}
 

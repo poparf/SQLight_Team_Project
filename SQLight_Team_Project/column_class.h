@@ -11,7 +11,7 @@ class Column {
 private:
 	string columnName = "";
 	columnTypes type = columnTypes::TEXT;
-	size_t size = 0;
+	int size = 0;
 	string defaultValue = "";
 public:
 
@@ -27,7 +27,7 @@ public:
 		this->type = type;
 	}
 
-	void setSize(size_t input) {
+	void setSize(int input) {
 		this->size = input;
 	}
 
@@ -35,7 +35,7 @@ public:
 		return this->columnName;
 	}
 
-	size_t getSize() {
+	int getSize() {
 		return this->size;
 	}
 
