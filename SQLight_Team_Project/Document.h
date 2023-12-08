@@ -35,6 +35,7 @@ class CsvDocument : public Document {
 
 };
 
+
 class BinDocument : public Document {
 private:
 

@@ -48,15 +48,19 @@ public:
 	}
 
 	void insertRow(string* input) {
-		if (this->rowsAvailable == 0) {
+		/*if (this->rowsAvailable == 0) {
+			this->doubleSpace();
+		}*/
+		if (this->nextRow == this->noRows) {
 			this->doubleSpace();
 		}
+
 		for (int i = 0; i < this->noColumns; i++) {
 			this->data[this->nextRow][i] = input[i];
 		}
 		
 		this->nextRow += 1;
-		this->rowsAvailable -= 1;
+		//this->rowsAvailable -= 1;
 	}
 
 	string getName() {
@@ -113,6 +117,11 @@ public:
 	}
 
 	void operator=(const Table& table) {
+		
+		if (&table == this) {
+			return;
+		}
+		
 		this->name = table.name;
 
 		Column* newCols = new Column[table.noColumns];
@@ -125,14 +134,15 @@ public:
 		this->noColumns = table.noColumns;
 
 
-		this->noRows = table.noRows;
-		this->rowsAvailable = table.rowsAvailable;
-		this->nextRow = table.nextRow;
-
 		for (int i = 0; i < this->noRows; i++) {
 			delete[] this->data[i];
 		}
 		delete[] this->data;
+
+		this->noRows = table.noRows;
+		this->rowsAvailable = table.rowsAvailable;
+		this->nextRow = table.nextRow;
+
 
 		data = new string * [table.noRows];
 		for (int i = 0; i < table.noRows; i++) {
@@ -165,6 +175,8 @@ public:
 		this->rowsAvailable = table.rowsAvailable;
 		this->nextRow = table.nextRow;
 
+		//memcpy(this->data, table.data, table.noRows * table.noColumns * sizeof(string));
+
 		data = new string * [table.noRows];
 		for (int i = 0; i < table.noRows; i++) {
 			data[i] = new string[table.noColumns];
@@ -190,7 +202,7 @@ public:
 private:
 	void doubleSpace() {
 		string** newData = new string * [this->noRows * 2];
-
+		
 		for (int i = 0; i < this->noRows * 2; i++) {
 			newData[i] = new string[this->noColumns];
 		}
@@ -205,14 +217,14 @@ private:
 			delete[] this->data[i];
 		}
 		delete[] this->data;
-
+		
 		this->nextRow = this->noRows + 1;
 		this->noRows *= 2;
-		this->rowsAvailable = this->noRows / 2;
+		this->rowsAvailable = this->noRows - this->nextRow;
 
-		for (int i = 0; i < this->noRows; i++) {
-			this->data[i] = newData[i];
-		}
+		//for (int i = 0; i < this->noRows; i++) {
+			//this->data[i] = newData[i];
+		//}
 		this->data = newData;
 
 	}
