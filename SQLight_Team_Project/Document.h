@@ -4,8 +4,6 @@
 #include "table_class.h"
 using namespace std;
 
-
-// trebuia sa scriu doar declaratia si fnctia in sine in cpp
 class Document
 {
 protected:
@@ -15,7 +13,7 @@ protected:
 
 public:
 	Document(string fileName) : fileName(fileName) {
-	// ce pun aici ?
+
 	
 	}
 

@@ -12,18 +12,14 @@ private:
 	Column* columns = nullptr;
 	int noColumns = 0;
 
-	// Question: Este ok asa ? 
-	// Am incercat sa fac cu o clasa Row dar depindea de
-	// informatii din clasa Column.
 	string** data = nullptr;
 	int noRows = 0;
-	int rowsAvailable = 0;
 	int nextRow = 0;
 public:
 	Table() {
 		this->noRows = 100;
 		this->data = new string*[this->noRows];
-		this->rowsAvailable = 100;
+
 
 		for (int i = 0; i < this->noRows; i++)
 			this->data[i] = new string[this->noColumns];
@@ -41,16 +37,14 @@ public:
 
 		this->noRows = 100;
 		this->data = new string*[this->noRows];
-		this->rowsAvailable = 100;
+		
 
 		for (int i = 0; i < this->noRows; i++)
 			this->data[i] = new string[this->noColumns];
 	}
 
 	void insertRow(string* input) {
-		/*if (this->rowsAvailable == 0) {
-			this->doubleSpace();
-		}*/
+	
 		if (this->nextRow == this->noRows) {
 			this->doubleSpace();
 		}
@@ -60,7 +54,7 @@ public:
 		}
 		
 		this->nextRow += 1;
-		//this->rowsAvailable -= 1;
+
 	}
 
 	string getName() {
@@ -95,7 +89,6 @@ public:
 
 	void setName(string input) {
 		// validare: daca exista un table cu acelasi dam throw
-
 		this->name = input;
 	}
 
@@ -140,7 +133,6 @@ public:
 		delete[] this->data;
 
 		this->noRows = table.noRows;
-		this->rowsAvailable = table.rowsAvailable;
 		this->nextRow = table.nextRow;
 
 
@@ -172,10 +164,7 @@ public:
 		this->noColumns = table.noColumns;
 
 		this->noRows = table.noRows;
-		this->rowsAvailable = table.rowsAvailable;
 		this->nextRow = table.nextRow;
-
-		//memcpy(this->data, table.data, table.noRows * table.noColumns * sizeof(string));
 
 		data = new string * [table.noRows];
 		for (int i = 0; i < table.noRows; i++) {
@@ -220,33 +209,33 @@ private:
 		
 		this->nextRow = this->noRows + 1;
 		this->noRows *= 2;
-		this->rowsAvailable = this->noRows - this->nextRow;
 
-		//for (int i = 0; i < this->noRows; i++) {
-			//this->data[i] = newData[i];
-		//}
 		this->data = newData;
-
 	}
 };
 
 void operator<<(ostream& console, Table t) {
-	console << endl << "~~~~ " << t.getName() << " ~~~~";
-	console << endl << "~~ No. of cols: " << t.getNoColumns();
-	console << endl << "~~~~~~~~~~~~~~~~";
+	
+	console << endl;
 	Column* columns = t.getColumns();
-	for (int i = 0; i < t.getNoColumns(); i++) {
-		console << columns[i];
+	console << " ";
+	for (int i = 0; i < t.noColumns; i++) {
+		console << columns[i].getColumnName();
+		console << " ";
 	}
-
-	cout << endl << "~~~~~~~~~~~~~~~~";
-	cout << endl << "~~~~ DATA ~~~~~~";
-	cout << endl << "~~~~~~~~~~~~~~~~";
+	console << endl;
+	for (int i = 0; i < t.noColumns; i++) {
+		console << " ";
+		for (int j = 0; j < columns[i].getColumnName().length(); j++) {
+			console << "-";
+		}
+	}
 
 	for (int i = 0; i < t.nextRow; i++) {
 		cout << "\n";
+		console << " ";
 		for (int j = 0; j < t.noColumns; j++) {
-			cout << t.data[i][j] << " ";
+			console << t.data[i][j] << " ";
 		}
 	}
 	delete[] columns;
