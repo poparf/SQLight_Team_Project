@@ -1,13 +1,11 @@
 #pragma once
-#include <iostream>
-#include <string>
 #include <regex>
 #include "utils.h"
 #include "column_class.h"
 #include "table_class.h"
-#include <fstream>
 #include "Document.h"
 using namespace std;
+
 
 
 struct properFormats {
@@ -22,6 +20,11 @@ struct properFormats {
 	string properUe = "UPDATE table_name SET column_name = value WHERE  column_name = value (the SET column may be different than the WHERE one)";
 };
 
+//struct partialRegexList {
+//	string partialCreateTable = "^\\s*CREATE\\s+TABLE\\s*";
+//	string partialCreateIndex = "^\\s*CREATE\\s+INDEX\\s*";
+//};
+
 struct regexList {
 	string fullCreateTable = "^\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9]+)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]+\\s*,\\s*[A-Za-z]+\\s*,\\s*[0-9]+\\s*,\\s*[A-Za-z0-9\"']+\\s*\\)\\s*,?\\s*)+?)\\s*\\)$";
 	string fullCreateIndex = "^\\s*CREATE\\s+INDEX\\s*(IF\\s+NOT\\s+EXISTS)?\\s+([a-zA-Z0-9]+)\\s+ON\\s+([a-zA-Z0-9]+)\\s+\\((\\s*[a-zA-Z0-9]+)\\s*\\)$";
@@ -34,6 +37,21 @@ struct regexList {
 	string fullUpdate = "^\\s*UPDATE\\s+([a-zA-Z0-9]+)\\s+SET\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9\"']+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9\"']+)\\s*$";
 };
 
+//class RegexManager {
+//private:
+//	string* partialCommandStr = nullptr;
+//	string* fullCommandStr = nullptr;
+//	regex* RgxExp = nullptr;
+//	regex* RgxExpPartial = nullptr;
+//	int noCommands = 0;
+//public:
+//	RegexManager() {
+//		this->partialCommandStr = new string[noCommands];
+//		
+//	}
+//};
+
+
 class CmdProcessor
 {
 private:
@@ -42,6 +60,7 @@ public:
 	bool checkCmd(TableBuffer& tableBuffer) {
 		properFormats formats;
 		regexList rlist;
+
 
 		regex ct("^\\s*CREATE\\s+TABLE\\s*", regex::icase);
 		regex ci("^\\s*CREATE\\s+INDEX\\s*", regex::icase);
@@ -351,7 +370,6 @@ private:
 		for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
 			smatch match = *i;
 			string match_str = match.str();
-			cout << endl << match_str;
 			data[j] = match_str;
 			j += 1;
 		}

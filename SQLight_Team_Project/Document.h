@@ -1,6 +1,5 @@
 #pragma once
 #include <fstream>
-#include <iostream>
 #include "table_class.h"
 using namespace std;
 
@@ -73,23 +72,23 @@ public:
 		for (int i = 0; i < noCols; i++) {
 			// ColumnName type string
 			string colName = inputCols[i].getColumnName();
-			int colNameSize = colName.size();
-			outFile.write((char*)&colNameSize, sizeof(colNameSize));
-			outFile.write(colName.c_str(), colNameSize);
+			int colNamesize = colName.size();
+			outFile.write((char*)&colNamesize, sizeof(colNamesize));
+			outFile.write(colName.c_str(), colNamesize);
 			
 			// Type of the column written as int INT  - 0 FLOAT - 1 TEXT -2
 			int colType = inputCols[i].getType();
 			outFile.write((char*)&colType, sizeof(int));
 
 			// Maximum size of the column
-			int colMaxSize = inputCols[i].getSize();
-			outFile.write((char*)&colMaxSize, sizeof(colMaxSize));
+			int colMaxsize = inputCols[i].getSize();
+			outFile.write((char*)&colMaxsize, sizeof(colMaxsize));
 
 			// The default value
 			string colDefValue = inputCols[i].getDefaultValue();
-			int defSize = colDefValue.size();
-			outFile.write((char*)&defSize, sizeof(defSize));
-			outFile.write(colDefValue.c_str(), defSize);
+			int defsize = colDefValue.size();
+			outFile.write((char*)&defsize, sizeof(defsize));
+			outFile.write(colDefValue.c_str(), defsize);
 		}
 
 		delete[] inputCols;
@@ -103,11 +102,11 @@ public:
 	
 		Column* cols = table.getColumns();
 		int noCols = table.getNoColumns();
-		int defSize;
+		int defsize;
 
 		for (int i = 0; i < noCols; i++) {
-			defSize = cols[i].getSize();
-			this->outFile.write(data[i].c_str(), defSize);
+			defsize = cols[i].getSize();
+			this->outFile.write(data[i].c_str(), defsize);
 		}
 		delete[] cols;
 	}

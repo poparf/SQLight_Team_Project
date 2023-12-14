@@ -1,17 +1,21 @@
 #include <iostream>
+#include <regex>
 #include <string>
 #include <stdlib.h>
+#include <fstream>
 #include "utils.h"
 #include "cmdProcessor_class.h"
 #include "table_class.h"
-#include <fstream>
 #include "Document.h"
+#include "RgxManager.h"
 using namespace std;
 
 int main() {
 	CmdProcessor buffer;
 	properFormats formats;
 	TableBuffer tableBuffer;
+
+
 	try {
 		buffer.insertCommands(tableBuffer);
 	}

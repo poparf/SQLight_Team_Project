@@ -1,6 +1,4 @@
 #pragma once
-#include <iostream>
-#include <string>
 #include "utils.h"
 #include "column_class.h"
 
@@ -215,7 +213,7 @@ private:
 };
 
 void operator<<(ostream& console, Table t) {
-	
+
 	console << endl;
 	Column* columns = t.getColumns();
 	console << " ";

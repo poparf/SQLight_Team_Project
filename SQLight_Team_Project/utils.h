@@ -1,6 +1,4 @@
 #pragma once
-#include <string>
-#include <iostream>
 
 using namespace std;
 #define NO_SECONDARY_COMMANDS 3
@@ -28,3 +26,4 @@ int checkSecondaryCommand(string fullCmd) {
 	}
 	return -1;
 }
+
