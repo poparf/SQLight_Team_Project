@@ -10,11 +10,12 @@
 #include "RgxManager.h"
 using namespace std;
 
+
 int main() {
 	CmdProcessor buffer;
 	properFormats formats;
 	TableBuffer tableBuffer;
-
+	properFormats pf;
 
 	try {
 		buffer.insertCommands(tableBuffer);
@@ -50,15 +51,10 @@ int main() {
 					cout << endl << "Available commands at this point:";
 					cout << "\n" << "/quit";
 					cout << "\n" << "/clear";
-					cout << "\n" << formats.properCt;
-					cout << "\n" << formats.properCi;
-					cout << "\n" << formats.properDf;
-					cout << "\n" << formats.properDi;
-					cout << "\n" << formats.properDplt;
-					cout << "\n" << formats.properDt;
-					cout << "\n" << formats.properIi;
-					cout << "\n" << formats.properSt;
-					cout << "\n" << formats.properUe;
+					for (int i = 0; i < pf.noFormats; i++) {
+						cout << "\n" << pf.formats[i];
+					}
+					
 					break;
 				default:
 					if (!buffer.checkCmd(tableBuffer)) {

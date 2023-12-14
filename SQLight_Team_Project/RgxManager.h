@@ -1,7 +1,5 @@
 #pragma once
 
-#define regexFilePath "regexList.txt"
-#define partialRegexFilePath "partialRegexList.txt"
 
 class RegexManager {
 protected:
@@ -12,6 +10,20 @@ protected:
 		for (int i = 0; i < noCommands; i++)
 			delete regexCommand[i];
 		delete[] regexCommand;
+	}
+
+public:
+	regex** getRegexes() {
+		regex** newRegexes = new regex*[this->noCommands];
+		for (int i = 0; i < this->noCommands; i++) {
+			newRegexes[i] = regexCommand[i];
+		}
+
+		return newRegexes;
+	}
+
+	int getNoCommands() {
+		return this->noCommands;
 	}
 };
 
@@ -36,7 +48,6 @@ public:
 				rgxFile.ignore();
 				rgxFile.getline(buffer, 1000);
 				lines[i++] = string(buffer);
-				cout << endl << lines[i - 1];
 			}
 
 			initialize(lines);
