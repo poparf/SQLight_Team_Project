@@ -174,7 +174,7 @@ public:
 
 private:
 	void createTable(smatch matches, TableBuffer& tableBuffer) {
-		regex partitionRegex("[^ ,()][a-zA-Z0-9\"'îí\\s*]*");
+		regex partitionRegex("[^ ,()][a-zA-Z0-9\"'‚Äù‚Äô\\s*]*");
 		smatch partitionMatches;
 
 		// matches[0] = toata comanda
@@ -338,6 +338,15 @@ private:
 	}
 
 	void select(smatch matches, TableBuffer& tableBuffer) {
+
+// select colx from tabley where colx = smth
+// search for a file named tabley
+// special class for that
+// ifstream tFile(matches[1]);
+// if(tFile.isOpen()) {
+//  Table tableReaded = readTable() to be implemented
+//  
+// }
 		return;
 	}
 
