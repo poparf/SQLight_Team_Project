@@ -7,7 +7,7 @@ enum columnTypes { INTEGER, FLOAT, TEXT };
 
 class Column {
 private:
-	string columnName = "";
+	string columnName;
 	columnTypes type = columnTypes::TEXT;
 	int size = 0;
 	string defaultValue = "";

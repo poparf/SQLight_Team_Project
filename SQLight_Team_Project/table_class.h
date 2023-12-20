@@ -14,6 +14,78 @@ private:
 	int noRows = 0;
 	int nextRow = 0;
 public:
+
+	void setColumns(Column* inputCols, int inputNoCols) {
+		Column* newColumns = new Column[inputNoCols];
+
+		for (int i = 0; i < inputNoCols; i++)
+			newColumns[i] = inputCols[i];
+
+		if (this->columns != nullptr)
+			delete[] this->columns;
+
+		this->columns = newColumns;
+		this->noColumns = inputNoCols;
+	}
+	void setData(string** inputData, int noRows, int nextRow, int noColumns) {
+		
+		this->nextRow = nextRow;
+		this->setNoColumns(noColumns);
+		
+
+		if (this->data != nullptr) {
+			for (int i = 0; i < this->noRows; i++) {
+				delete[] this->data[i];
+			}
+			delete[] this->data;
+		}
+		this->noRows = noRows;
+		this->nextRow = nextRow;
+
+		string** newData;
+		newData = new string * [noRows];
+		for (int i = 0; i < noRows; i++) {
+			newData[i] = new string[noColumns];
+		}
+
+		for (int i = 0; i < noRows; i++) {
+			for (int j = 0; j < noColumns; j++) {
+				newData[i][j] = inputData[i][j];
+			}
+		}
+
+		this->data = newData;
+	}
+
+	// Convention to write into the file as follows:
+		// no of columns
+		// no of rows
+		// Column i
+		//   - length of col name
+		//   - columnName
+		//   - columnType
+		//   - max size of the column
+		//   - length of defaultValue
+		//   - defaultValue
+		// ABOVE REPEATS AS MANY COLUMNS AS WE HAVE..
+		// 
+		// Row 1  the number of cells is equal to the no of columns
+		//	- size of cell string
+		//	- string in the cell
+	
+	void setNoRows(int noRows) {
+		if (noRows < 0)
+			throw exception("Negativen no rows");
+
+		this->noRows = noRows;
+	}
+
+	void setNextRowForFile() {
+		this->nextRow = noRows;
+	}
+
+	
+
 	Table() {
 		this->noRows = 100;
 		this->data = new string*[this->noRows];
@@ -36,6 +108,25 @@ public:
 		this->noRows = 100;
 		this->data = new string*[this->noRows];
 		
+
+		for (int i = 0; i < this->noRows; i++)
+			this->data[i] = new string[this->noColumns];
+	}
+
+
+	Table(string inputName, Column* inputColumns, int inputNoColumns, int noRows) {
+		this->columns = new Column[inputNoColumns];
+
+		this->setNoColumns(inputNoColumns);
+		for (int i = 0; i < this->noColumns; i++) {
+			this->columns[i] = inputColumns[i];
+		}
+
+		this->setName(inputName);
+
+		this->noRows = noRows;
+		this->data = new string * [this->noRows];
+
 
 		for (int i = 0; i < this->noRows; i++)
 			this->data[i] = new string[this->noColumns];
@@ -96,6 +187,7 @@ public:
 		}
 		this->noColumns = input;
 	}
+
 
 	Column* getColumns() {
 		Column* newColumns = new Column[this->noColumns];
@@ -188,6 +280,20 @@ public:
 	friend void operator<<(ostream& console, Table t);
 private:
 	void doubleSpace() {
+		if (this->noRows == 0) {
+			string** newData = new string * [2];
+
+			for (int i = 0; i < 2;  i++) {
+				newData[i] = new string[this->noColumns];
+			}
+			delete[] this->data;
+
+			this->nextRow = 0;
+			this->noRows = 2;
+
+			this->data = newData;
+			return;
+		}
 		string** newData = new string * [this->noRows * 2];
 		
 		for (int i = 0; i < this->noRows * 2; i++) {
@@ -244,17 +350,76 @@ class TableBuffer {
 	Table* tables = nullptr;
 	int noTables = 0;
 public:
+
+
+	Table operator[](string name) {
+		for (int i = 0; i < this->noTables; i++) {
+			if (tables[i].getName() == name) {
+				return tables[i];
+			}
+		}
+	}
+
+	/*
+	* whne a command is inserted
+	* we should check if we have a file associated with the table name+
+	* if yes then we read it in the tablebuffer
+	* if not we return error
+	* 
+	* then we process the command inside the buffer and replace the old file 
+	*/
+
+	void remove(string tableName) {
+		if (!this->doesTableExist(tableName)) {
+			throw exception("Table does not exist.");
+		}
+
+		this->noTables -= 1;
+		Table* newTables = new Table[this->noTables];
+		
+		int j = 0;
+		for (int i = 0; i < this->noTables + 1; i++) {
+			if (this->tables[i].getName() == tableName) {
+				i++; // just skip the table..
+			}
+			else {
+				newTables[j++] = this->tables[i];
+			}
+		}
+
+		delete[] this->tables;
+
+		this->tables = newTables;
+	}
+
+	// it searches if the table exists in files if yes it returns it
+	Table searchTable(string fileName) {
+		
+	}
+
 	TableBuffer() {
 
 	}
 
+
+	// check also in files
 	bool doesTableExist(string input) {
 		for (int i = 0; i < noTables; i++) {
 			if (tables[i].getName() == input) {
+				cout << endl << "The table exists in buffer.";
 				return 1;
 			}
 		}
+
+		ifstream temp(input + ".bin");
+		if (temp.is_open()) {
+			cout << endl << "The table exists in a file.";
+			cout << endl << "Load ?";
+			return 1;
+		}
+	
 		return 0;
+		
 	}
 
 	void insertRowByName(string* data, string tableName) {

@@ -173,6 +173,7 @@ public:
 
 
 private:
+
 	void createTable(smatch matches, TableBuffer& tableBuffer) {
 		regex partitionRegex("[^ ,()][a-zA-Z0-9\"'”’\\s*]*");
 		smatch partitionMatches;
@@ -260,7 +261,8 @@ private:
 
 	void dropTable(smatch matches, TableBuffer& tableBuffer) {
 		cout << matches.str();
-		return;
+		remove((matches[1].str() + ".bin").c_str());
+		tableBuffer.remove(matches[1].str());
 	}
 
 	void dropIndex(smatch matches, TableBuffer& tableBuffer) {
@@ -299,11 +301,15 @@ private:
 				break;
 			}
 			else {
-				cout << endl << "There is no table with name: " << tableNameInput;
-				throw exception("\nError: Table not found.");
+				cout << endl << "There is no table with name: " << tableNameInput << " in buffer.";
+				cout << endl << "Let's check in files.";
+				inTable fTable(tableNameInput);
+
+				foundTable = fTable.getTable();
+				tableBuffer = tableBuffer + foundTable;
 			}
 		}
-		
+
 		regex partitionRegex("[^ ,][a-zA-Z0-9\"'\\s*]*");
 
 		smatch input;
@@ -327,7 +333,8 @@ private:
 
 		tableBuffer.insertRowByName(data, tableNameInput);
 		BinDocument doc(tableNameInput + ".bin");
-		doc.writeRows(data, foundTable);
+		
+		doc.writeRows(data, tableBuffer[tableNameInput]);
 
 		delete[] data;
 		delete[] tables;

@@ -65,7 +65,9 @@ public:
 		//  
 		Column* inputCols = writeTable.getColumns();
 		int noCols = writeTable.getNoColumns();
-		int noRows = writeTable.getNoRows();
+
+		// aici in loc de noRows ar trebui sa fie ceva next row
+		int noRows = writeTable.getNextRow();
 		outFile.write((char*)&noCols, sizeof(int));
 		outFile.write((char*)&noRows, sizeof(int));
 
@@ -98,8 +100,8 @@ public:
 	// Chiar daca fac amortizarea ar trebui sa scriu in fisier
 	// numarul real de rows. adica la fiecare insert sa apelez
 	// functia aceasta:
-	void writeRows(string* data, Table& table) {
-	
+	void writeRows(string* data,Table table) {
+
 		Column* cols = table.getColumns();
 		int noCols = table.getNoColumns();
 		int defsize;
@@ -109,8 +111,169 @@ public:
 			this->outFile.write(data[i].c_str(), defsize);
 		}
 		delete[] cols;
+
+		// pointeru e la finalul fisierului
+		// seek la 4 bytes dupa
+		// rescriem 4 bytes cu next row.
+		long pos = outFile.tellp();
+		this->outFile.seekp(4);
+		int nextRow = table.getNextRow();
+		this->outFile.write((char*)&nextRow, sizeof(int));
+		this->outFile.seekp(pos);
 	}
 };
+
+/*
+PROBLEma e asa
+noi scriem numarul de rows in fisier ( 100 )
+chiar dacam am pus 100 noi in fisier punem doar rows urile existente
+
+cum facem sa citim? 
+
+fisier separat
+- nr real de rows
+	nota: la fiecare double space rescriem fisierul cu nr real de rows
+- nr scris de row
+	nota: 
+
+	// atunci cand adaug un row ar trebui sa modific in fisier nr rows. si sa scriu nr real de rows
+	// adica nr de rows scrise
+
+*/
+
+
+
+
+
+// the purpose of the class is to read a table from a file from the disk
+class inTable {
+protected:
+	string name = "";
+	ifstream file;
+	Table fTable;
+public:
+	inTable(string fileName) {
+		try {
+			this->name = fileName;
+			searchTable(fileName);
+
+			readFileTable();
+		}
+		catch  (exception& e) {
+			cout << endl << e.what();
+		}
+
+	}
+
+	Table getTable() {
+		return fTable;
+	}
+
+	// it searches if the table exists in files if yes it returns it
+	void searchTable(string fileName) {
+		this->file.open(fileName + ".bin");
+
+		if (!this->file.is_open()) {
+			throw exception("Invalid file name.");
+		}
+	}
+
+
+private:
+	void readFileTable() {
+		// Convention to write into the file as follows:
+		// no of columns
+		// no of rows
+		// Column i
+		//   - length of col name
+		//   - columnName
+		//   - columnType
+		//   - max size of the column
+		//   - length of defaultValue
+		//   - defaultValue
+		// ABOVE REPEATS AS MANY COLUMNS AS WE HAVE..
+		// 
+		// Row 1  the number of cells is equal to the no of columns
+		//	- size oof defautl size
+		//	- string in the cell
+		// citim nr real de rows
+		// facem o matrice cu nr de coloane si nr real de rows
+		// next row va fi urmatorul rand la nr real de rows
+		// astfel la urmatorul insert se apeleaza double space
+	
+		int noCols;
+		file.read((char*)&noCols, sizeof(int));
+		int noRows;
+		file.read((char*)&noRows, sizeof(int));
+		
+		Column* columns = new Column[noCols];
+
+		for (int i = 0; i < noCols; i++) {
+			int lenColName;
+			file.read((char*)&lenColName, sizeof(int));
+		
+			char* temp1 = new char[lenColName + 1];
+			file.read(temp1, lenColName);
+			temp1[lenColName] = '\0';
+			string colName = temp1;
+			delete[] temp1;
+
+			columns[i].setColumnName(colName);
+
+			columnTypes type;
+			file.read((char*)&type, sizeof(type));
+			columns[i].setType(type);
+
+			int maxSize;
+			file.read((char*)&maxSize, sizeof(maxSize));
+			columns[i].setSize(maxSize);
+
+			int defValueLen;
+			file.read((char*)&defValueLen, sizeof(int));
+
+			char* temp2 = new char[defValueLen + 1];
+			file.read(temp2, defValueLen);
+			temp2[defValueLen] = '\0';
+			string defValue = temp2;
+			delete[] temp2;
+
+			columns[i].setDefaultValue(defValue);
+		}
+			
+		Table tempTable(this->name, columns, noCols, noRows);
+
+
+		/*string** readData = new string * [noCols];
+		
+		for (int i = 0; i < noCols; i++) {
+			readData[i] = new string[noRows];
+		}
+*/	
+		string* row = new string[noCols];
+
+		for (int i = 0; i < noRows; i++) {
+			for (int j = 0; j < noCols; j++) {
+				//file.read(&readData[i][j][0], columns[i].getSize());
+				char* temp3 = new char[columns[i].getSize() + 1];
+				file.read(temp3, columns[i].getSize());
+				temp3[columns[i].getSize()] = '\0';
+				string temp = temp3;
+				delete[] temp3;
+				row[j] = temp;
+			}
+			tempTable.insertRow(row);
+			
+		}
+
+		this->fTable = tempTable;
+		delete[] row;
+	}
+
+};
+
+
+
+
 
 
 
