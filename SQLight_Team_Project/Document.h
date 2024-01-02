@@ -71,6 +71,13 @@ public:
 		outFile.write((char*)&noCols, sizeof(int));
 		outFile.write((char*)&noRows, sizeof(int));
 
+		ofstream fRows("rows_" + this->fileName, ios::binary);
+		if (!fRows.is_open())
+			throw exception("cpuld not write the number of rows at the creation. 0");
+
+		fRows.write((char*)&noRows, sizeof(int));
+		fRows.close();
+
 		for (int i = 0; i < noCols; i++) {
 			// ColumnName type string
 			string colName = inputCols[i].getColumnName();
@@ -112,14 +119,30 @@ public:
 		}
 		delete[] cols;
 
-		// pointeru e la finalul fisierului
-		// seek la 4 bytes dupa
-		// rescriem 4 bytes cu next row.
-		long pos = outFile.tellp();
-		this->outFile.seekp(4);
+		//// pointeru e la finalul fisierului
+		//// seek la 4 bytes dupa
+		//// rescriem 4 bytes cu next row.
+		//// chestia asta nu merge cum ar trebui
+		//// cateodata se scrie spatiu gol.. de ce?
+		//long pos = outFile.tellp();
+		//this->outFile.seekp(4,ios_base::beg);
+		//int nextRow = table.getNextRow();
+		//this->outFile.write((char*)&nextRow, sizeof(int));
+		//this->outFile.seekp(0, ios_base::end);
+
+		//fstream modifyRows(this->fileName + ".bin", ios::binary);
+		//modifyRows.seekp(4, ios::beg);
 		int nextRow = table.getNextRow();
-		this->outFile.write((char*)&nextRow, sizeof(int));
-		this->outFile.seekp(pos);
+		//this->outFile.write((char*)&nextRow, sizeof(int));
+		//modifyRows.close();
+
+		ofstream fRows("rows_" +this->fileName, ios::binary);
+		if (!fRows.is_open()) {
+			string message = "could not write the number of rows at insert: \nrows_" + this->fileName;
+			throw exception(message.c_str());
+		}
+		fRows.write((char*)&nextRow, sizeof(int));
+		fRows.close();
 	}
 };
 
@@ -206,6 +229,18 @@ private:
 		int noRows;
 		file.read((char*)&noRows, sizeof(int));
 		
+		ifstream fRows("rows_" + this->name + ".bin");
+		if (!fRows.is_open())
+		{
+			string message = "Error at reading: rows_" + this->name;
+			throw exception(message.c_str());
+		}
+			
+
+		fRows.read((char*)&noRows, sizeof(int));
+		fRows.close();
+
+
 		Column* columns = new Column[noCols];
 
 		for (int i = 0; i < noCols; i++) {

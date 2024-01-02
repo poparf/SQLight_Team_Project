@@ -295,6 +295,15 @@ private:
 		string tableNameInput = matches[1].str();
 		Table foundTable;
 		int k;
+		if (size == 0) {
+			cout << endl << "There is no table with name: " << tableNameInput << " in buffer.";
+			cout << endl << "Let's check in files.";
+			inTable fTable(tableNameInput);
+
+			foundTable = fTable.getTable();
+			tableBuffer = tableBuffer + foundTable;
+		}
+
 		for (k = 0; k < size; k++) {
 			if (tableNameInput == tables[k].getName()) {
 				 foundTable = tables[k];
@@ -324,7 +333,7 @@ private:
 
 		string* data = new string[foundTable.getNoColumns()];
 		int j = 0;
-		for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
+		for (sregex_iterator i = words_begin; i != words_end; ++i) {
 			smatch match = *i;
 			string match_str = match.str();
 			data[j] = match_str;
@@ -345,10 +354,64 @@ private:
 	}
 
 	void select(smatch matches, TableBuffer& tableBuffer) {
+
+
+		//cout << matches[1].str();		  // ce e in paranteza sau all
+		//cout << endl << matches[5].str(); // table name
+		//cout << endl << matches[7].str(); // coloana din where
+		//cout << endl << matches[8].str(); // valoarea din where
+
+		if (!tableBuffer.doesTableExist(matches[5].str())) {
+			
+			throw exception("There is no table with that name.");
+			
+			/*
+			cout << endl << "There is no table with name: " << matches[1].str() << " in buffer.";
+			cout << endl << "Let's check in files.";
+			inTable fTable(tableNameInput);
+
+			foundTable = fTable.getTable();
+			tableBuffer = tableBuffer + foundTable;*/
+		}
+			
+		if (toLowerCase(matches[1].str()) == "all") {
+
+			if (matches[7] == "") {
+				int size = tableBuffer.getNoTables();
+				Table* tables = tableBuffer.getTables();
+
+				for (int i = 0; i < size; i++) {
+					if (matches[5].str() == tables[i].getName()) {
+						cout << tables[i];
+						delete[] tables;
+						return;
+					}
+				}
+			}
+			else {
+				int size = tableBuffer.getNoTables();
+				Table* tables = tableBuffer.getTables();
+				for (int i = 0; i < size; i++) {
+					if (matches[5].str() == tables[i].getName()) {
+						tables[i].printTableWhere(matches[7].str(), matches[8].str());
+						delete[] tables;
+						return;
+					}
+				}
+
+
+			}
+		}
+
+
+
+
 		return;
 	}
 
 	void update(smatch matches, TableBuffer& tableBuffer) {
+
+
 		return;
 	}
 };

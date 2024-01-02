@@ -15,6 +15,52 @@ private:
 	int nextRow = 0;
 public:
 
+	void printAllTableWhere(string colName, string value) {
+		cout << endl;
+		
+		cout << " ";
+		for (int i = 0; i < this->noColumns; i++) {
+			cout << columns[i].getColumnName();
+			cout << " ";
+		}
+		cout << endl;
+		for (int i = 0; i < this->noColumns; i++) {
+			cout << " ";
+			for (int j = 0; j < columns[i].getColumnName().length(); j++) {
+				cout << "-";
+			}
+		}
+		cout << endl;
+		int* validRows = new int[this->noRows];
+		int nrColoanei = 0;
+		// a cata coloane e cea din where clause ?
+		for (int i = 0; i < this->noColumns; i++) {
+			if (colName == this->columns[i].getColumnName()) {
+				nrColoanei = i;
+				break;
+			}
+		}
+
+
+		for (int i = 0; i < this->nextRow; i++) {
+			if (this->data[i][nrColoanei] == value) {
+			
+				for (int j = 0; j < this->noColumns; j++) {
+					cout << this->data[i][j] << " ";
+				}
+				cout << endl;
+			}
+		}
+	}
+
+	void printSpecificColumnsWhere(string* colNames,int noColNames, string whereColumn, string value) {
+
+	}
+
+	void printSpecificColumns(string* colNames, int noColNames) {
+
+	}
+
 	void setColumns(Column* inputCols, int inputNoCols) {
 		Column* newColumns = new Column[inputNoCols];
 
@@ -315,6 +361,10 @@ private:
 		this->noRows *= 2;
 
 		this->data = newData;
+
+		if (this->nextRow == this->noRows) {
+			this->doubleSpace();
+		}
 	}
 };
 
