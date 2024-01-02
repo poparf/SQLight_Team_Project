@@ -1,6 +1,4 @@
 #pragma once
-#include "utils.h"
-
 using namespace std;
 
 enum columnTypes { INTEGER, FLOAT, TEXT };

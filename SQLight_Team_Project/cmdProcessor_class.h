@@ -4,7 +4,8 @@
 #include "utils.h"
 #include "Column.h"
 #include "Table.h"
-#include "Document.h"
+#include "TableBuffer.h"
+#include "Files.h"
 #include "RgxManager.h"
 
 
@@ -143,21 +144,22 @@ public:
 
 private:
 
-	void createTable(smatch matches, TableBuffer& tableBuffer) {
+	void createTable(smatch matches, TableBuffer& tb) {
 		regex partitionRegex("[^ ,()][a-zA-Z0-9\"'”’\\s*]*");
 		smatch partitionMatches;
-
-		// matches[0] = toata comanda
-		// matches[1] = table name,
-		// matches[2] = if not exists asta daca am scris daca nu e ""
-		//  iar al patrulea input este doar ce este in paranteza (col_name, etc... )
-		
 		string tableName = matches[1].str();
-
+		// If not exist condition
 		if (matches[2] != "") {
-			cout << endl << "IF NOT EXISTS USED.";
-			if (tableBuffer.doesTableExist(tableName)) {
-				throw exception("Another table found with the same name.");
+			// Checking the buffer
+			if (tb.isTable(tableName) != -1) {
+				throw exception("Another table found with the same name IN BUFFER.");
+			}
+			// Checking the files
+			ifstream file(tableName + ".bin", ios::binary);
+			if (file.is_open()) {
+
+				file.close();
+				throw exception("Another table found with the same name ON DISK.");
 			}
 		}
 
@@ -170,36 +172,38 @@ private:
 		// pentru ca in fiecare paranteza sunt cate 4 valori
 		// noi vrem sa creeam cate o coloana pt fiecare paranteza
 		// iar fiecare coloana are atribuite cate 4 valori
-		int noColumns = distance(words_begin, words_end) / 4;
-		Column* columns = new Column[noColumns];
+		int noCols = distance(words_begin, words_end) / 4;
+		Column** cols = new Column * [noCols];
+		for (int i = 0; i < noCols; i++)
+			cols[i] = new Column("", columnTypes::FLOAT, 0, ""); // we initialize a default column since we don t have a default constructor
 
 		int j = 0;
 		int k = 0;
 		// aici nu putem folosi i pentru ca e de tipul regex iterator nu int
 		for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
-			
+
 			std::smatch match = *i;
 			std::string match_str = match.str();
 			switch (k) {
 			case 0:
-				columns[j].setColumnName(match_str);
+				cols[j]->setName(match_str);
 				break;
 			case 1:
 				if (toLowerCase(match_str) == "integer")
-					columns[j].setType(columnTypes::INTEGER);
+					cols[j]->setType(columnTypes::INTEGER);
 				else if (toLowerCase(match_str) == "float")
-					columns[j].setType(columnTypes::FLOAT);
+					cols[j]->setType(columnTypes::FLOAT);
 				else if (toLowerCase(match_str) == "text")
-					columns[j].setType(columnTypes::TEXT);
+					cols[j]->setType(columnTypes::TEXT);
 				else
 					throw exception("Type of column must be integer, float or text.");
 				break;
 			case 2:
 				// stoi() transforms strings in integers
-				columns[j].setSize(stoi(match_str));
+				cols[j]->setSize(stoi(match_str));
 				break;
 			case 3:
-				columns[j].setDefaultValue(match_str);
+				cols[j]->setDef(match_str);
 				break;
 			}
 
@@ -214,79 +218,80 @@ private:
 				k = 0;
 			}
 		}
-		// aici in viitor o sa avem o functie care sa salveze tabelul
-		// si in fisier
-		Table t(tableName, columns, j);
-		BinDocument file(tableName + ".bin");
-		file.writeTable(t);
-
-		tableBuffer = tableBuffer + t;
+		
+		// We create the table and save it in the buffer and in files
+		Table t(tableName, cols, noCols);
+		tb.addTable(t);
+		outTable ot;
+		ot.write(tableName + ".bin", t);
 	}
-
-	// trebuie lucrat de aici in jos
+	
+	// Not implemented
 	void createIndex(smatch matches, TableBuffer& tableBuffer) {
+		cout << endl << "Not implemented." << endl;
 		return;
 	}
 
 	void dropTable(smatch matches, TableBuffer& tableBuffer) {
-		cout << matches.str();
-		remove((matches[1].str() + ".bin").c_str());
-		tableBuffer.remove(matches[1].str());
+		if (remove((matches[1].str() + ".bin").c_str()))
+			cout << endl << "There is no file with this name on the disk.";
+
+		int index = tableBuffer.isTable(matches[1].str());
+		if (index == -1)
+			throw exception("There is not table with this name in buffer.");
+	
+		tableBuffer.removeTable(index);
 	}
 
+	// Not implemented
 	void dropIndex(smatch matches, TableBuffer& tableBuffer) {
+		cout << endl << "Not implemented." << endl;
 		return;
 	}
 
-	void displayTable(smatch matches, TableBuffer& tableBuffer) {
-		int size = tableBuffer.getNoTables();
-		Table* tables = tableBuffer.getTables();
-		string tableNameInput = matches[1].str();
-		for (int i = 0; i < size; i++) {
-			if (tableNameInput == tables[i].getName()) {
-				cout << tables[i];
-				delete[] tables;
-				return;
-			}
-		}
+	void displayTable(smatch matches, TableBuffer& tb) {
 		
-		cout << endl << "There is no table with name: " << tableNameInput;
-	
-		delete[] tables;
-	}
-
-	void insertInto(smatch matches, TableBuffer& tableBuffer) {
-		// matches[1] =  table name
-		// matches[2] = ce e in paranteza
-
-		int size = tableBuffer.getNoTables();
-		Table* tables = tableBuffer.getTables();
-		string tableNameInput = matches[1].str();
-		Table foundTable;
-		int k;
-		if (size == 0) {
-			cout << endl << "There is no table with name: " << tableNameInput << " in buffer.";
-			cout << endl << "Let's check in files.";
-			inTable fTable(tableNameInput);
-
-			foundTable = fTable.getTable();
-			tableBuffer = tableBuffer + foundTable;
-		}
-
-		for (k = 0; k < size; k++) {
-			if (tableNameInput == tables[k].getName()) {
-				 foundTable = tables[k];
-				break;
+		string tableName = matches[1].str();
+		// Checking the buffer
+		int index = tb.isTable(tableName);
+		if (index == -1) {
+			// Checking the files
+			ifstream file(tableName + ".bin", ios::binary);
+			if (file.is_open()) {
+				inTable it;
+				it.readIntoBuffer(tableName + ".bin", tb);
+				file.close();
 			}
 			else {
-				cout << endl << "There is no table with name: " << tableNameInput << " in buffer.";
-				cout << endl << "Let's check in files.";
-				inTable fTable(tableNameInput);
-
-				foundTable = fTable.getTable();
-				tableBuffer = tableBuffer + foundTable;
+				throw exception("There is no table with this name.");
 			}
 		}
+
+		Table t = tb.getTable(tb.isTable(tableName));
+		cout << t;
+	}
+
+	void insertInto(smatch matches, TableBuffer& tb) {
+	//	// matches[1] =  table name
+	//	// matches[2] = ce e in paranteza
+		string tableNameInput = matches[1].str();
+		int index = tb.isTable(tableNameInput);
+
+		if (index == -1) {
+			//cout << endl << "The table is not in the buffer. Let's check files"
+			ifstream f(tableNameInput + ".bin", ios::binary);
+			if (f.is_open()) {
+				// file exists so we load it
+				inTable it;
+				it.readIntoBuffer(tableNameInput + ".bin", tb);
+				f.close();
+			}
+			else {
+				throw exception("INSERT_ERROR: There is no table with this name.");
+			}
+		}
+
+		Table t = tb.getTable(tb.isTable(tableNameInput));
 
 		regex partitionRegex("[^ ,][a-zA-Z0-9\"'\\s*]*");
 
@@ -296,86 +301,88 @@ private:
 		auto words_begin = sregex_iterator(paranteza.begin(), paranteza.end(), partitionRegex);
 		auto words_end = sregex_iterator();
 
-		if (foundTable.getNoColumns() != distance(words_begin, words_end)) {
-			throw exception("\nError: You should insert as many values as the number of columns in that specific table.");
-		}
-
-		string* data = new string[foundTable.getNoColumns()];
+		int noCells = distance(words_begin, words_end);
+		Article** cells = new Article * [noCells];
+		
 		int j = 0;
 		for (sregex_iterator i = words_begin; i != words_end; ++i) {
 			smatch match = *i;
-			string match_str = match.str();
-			data[j] = match_str;
-			j += 1;
+			cells[j++] = new Article(match.str());
 		}
+		Row row(cells, noCells);
 
-		tableBuffer.insertRowByName(data, tableNameInput);
-		BinDocument doc(tableNameInput + ".bin");
-		
-		doc.writeRows(data, tableBuffer[tableNameInput]);
-
-		delete[] data;
-		delete[] tables;
+		t.addRow(row);
+		tb.replaceTable(t);
+		outTable ot; 
+		//ot.writeRow(tableNameInput + ".bin", row, t.getNoRows());
+		ot.write(tableNameInput + ".bin", t);
+		for (int i = 0; i < noCells; i++) {
+			delete cells[i];
+		}
+		delete[] cells;
 	}
 
+	// Deletes one column from a table
 	void deleteFrom(smatch matches, TableBuffer& tableBuffer) {
+
+	
 		return;
 	}
 
 	void select(smatch matches, TableBuffer& tableBuffer) {
 
 
-		//cout << matches[1].str();		  // ce e in paranteza sau all
-		//cout << endl << matches[5].str(); // table name
-		//cout << endl << matches[7].str(); // coloana din where
-		//cout << endl << matches[8].str(); // valoarea din where
+		////cout << matches[1].str();		  // ce e in paranteza sau all
+		////cout << endl << matches[5].str(); // table name
+		////cout << endl << matches[7].str(); // coloana din where
+		////cout << endl << matches[8].str(); // valoarea din where
 
-		if (!tableBuffer.doesTableExist(matches[5].str())) {
-			
-			throw exception("There is no table with that name.");
-			
-			/*
-			cout << endl << "There is no table with name: " << matches[1].str() << " in buffer.";
-			cout << endl << "Let's check in files.";
-			inTable fTable(tableNameInput);
+		//if (!tableBuffer.doesTableExist(matches[5].str())) {
+		//	
+		//	throw exception("There is no table with that name.");
+		//	
+		//	/*
+		//	cout << endl << "There is no table with name: " << matches[1].str() << " in buffer.";
+		//	cout << endl << "Let's check in files.";
+		//	inTable fTable(tableNameInput);
 
-			foundTable = fTable.getTable();
-			tableBuffer = tableBuffer + foundTable;*/
-		}
-			
-		if (toLowerCase(matches[1].str()) == "all") {
+		//	foundTable = fTable.getTable();
+		//	tableBuffer = tableBuffer + foundTable;*/
+		//}
+		//	
+		//if (toLowerCase(matches[1].str()) == "all") {
 
-			if (matches[7] == "") {
-				int size = tableBuffer.getNoTables();
-				Table* tables = tableBuffer.getTables();
+		//	if (matches[7] == "") {
+		//		int size = tableBuffer.getNoTables();
+		//		Table* tables = tableBuffer.getTables();
 
-				for (int i = 0; i < size; i++) {
-					if (matches[5].str() == tables[i].getName()) {
-						cout << tables[i];
-						delete[] tables;
-						return;
-					}
-				}
-			}
-			else {
-				int size = tableBuffer.getNoTables();
-				Table* tables = tableBuffer.getTables();
-				for (int i = 0; i < size; i++) {
-					if (matches[5].str() == tables[i].getName()) {
-						tables[i].printTableWhere(matches[7].str(), matches[8].str());
-						delete[] tables;
-						return;
-					}
-				}
-
-
-			}
-		}
+		//		for (int i = 0; i < size; i++) {
+		//			if (matches[5].str() == tables[i].getName()) {
+		//				cout << tables[i];
+		//				delete[] tables;
+		//				return;
+		//			}
+		//		}
+		//	}
+		//	else {
+		//		int size = tableBuffer.getNoTables();
+		//		Table* tables = tableBuffer.getTables();
+		//		for (int i = 0; i < size; i++) {
+		//			if (matches[5].str() == tables[i].getName()) {
+		//				tables[i].printTableWhere(matches[7].str(), matches[8].str());
+		//				delete[] tables;
+		//				return;
+		//			}
+		//		}
 
 
+		//	}
+		//}
 
 
-		return;
+
+
+		//return;
 	}
 
 	void update(smatch matches, TableBuffer& tableBuffer) {

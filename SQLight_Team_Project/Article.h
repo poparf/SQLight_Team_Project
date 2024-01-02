@@ -30,4 +30,9 @@ public:
 		this->data = l.data;
 	}
 
+	friend void operator<<(ostream& out, Article& a);
 };
+
+void operator<<(ostream& out, Article& a) {
+	cout << " " << a.data;
+}

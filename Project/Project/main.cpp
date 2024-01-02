@@ -5,8 +5,8 @@
 #include <fstream>
 #include "utils.h"
 #include "cmdProcessor_class.h"
-#include "Table.h"
-#include "Document.h"
+#include "TableBuffer.h"
+#include "Files.h"
 #include "RgxManager.h"
 using namespace std;
 
@@ -17,12 +17,12 @@ int main() {
 	TableBuffer tableBuffer;
 	properFormats pf;
 
-	try {
+	/*try {
 		buffer.insertCommands(tableBuffer);
 	}
 	catch (exception& e) {
 		cout << endl << e.what();
-	}
+	}*/
 	
 
 	while (1) {

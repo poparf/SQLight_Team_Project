@@ -17,6 +17,21 @@ public:
 		}
 	}
 
+	Article** getCells() {
+		Article** newCells = new Article * [this->noCells];
+
+		for (int i = 0; i < this->noCells; i++) {
+			newCells[i] = new Article(*this->cells[i]);
+		}
+
+		return newCells;
+
+	}
+
+	int getNoCells() {
+		return this->noCells;
+	}
+
 
 	// Copy Constructor
 	Row(const Row& r) {
@@ -25,7 +40,7 @@ public:
 		Article** newCells = new Article * [r.noCells];
 
 		for (int i = 0; i < r.noCells; i++) {
-			*newCells[i] = *r.cells[i];
+			newCells[i] = new Article(*r.cells[i]);
 		}
 
 		this->cells = newCells;
@@ -43,7 +58,7 @@ public:
 		Article** newCells = new Article * [r.noCells];
 
 		for (int i = 0; i < r.noCells; i++) {
-			*newCells[i] = *r.cells[i];
+			newCells[i] = new Article(*r.cells[i]);
 		}
 
 		this->cells = newCells;
@@ -51,7 +66,8 @@ public:
 		return r;
 	}
 
-	
+	friend void operator<<(ostream& out, Row& r);
+
 	// Destructor
 	~Row() {
 		for (int i = 0; i < this->noCells; i++) {
@@ -61,3 +77,11 @@ public:
 		delete[] this->cells;
 	}
 };
+
+
+void operator<<(ostream& out, Row& r) {
+	for (int i = 0; i < r.noCells; i++) {
+		cout << *r.cells[i];
+	}
+	cout << endl;
+}
