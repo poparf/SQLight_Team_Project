@@ -5,7 +5,7 @@
 #include <fstream>
 #include "utils.h"
 #include "cmdProcessor_class.h"
-#include "table_class.h"
+#include "Table.h"
 #include "Document.h"
 #include "RgxManager.h"
 using namespace std;

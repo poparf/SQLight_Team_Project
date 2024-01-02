@@ -2,8 +2,8 @@
 #include <regex>
 #include <functional> 
 #include "utils.h"
-#include "column_class.h"
-#include "table_class.h"
+#include "Column.h"
+#include "Table.h"
 #include "Document.h"
 #include "RgxManager.h"
 
@@ -40,37 +40,6 @@ public:
 		delete[] formats;
 	}
 };
-//
-////struct partialRegexList {
-////	string partialCreateTable = "^\\s*CREATE\\s+TABLE\\s*";
-////	string partialCreateIndex = "^\\s*CREATE\\s+INDEX\\s*";
-////};
-//
-//struct regexList {
-//	string fullCreateTable = "^\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9]+)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]+\\s*,\\s*[A-Za-z]+\\s*,\\s*[0-9]+\\s*,\\s*[A-Za-z0-9\"']+\\s*\\)\\s*,?\\s*)+?)\\s*\\)$";
-//	string fullCreateIndex = "^\\s*CREATE\\s+INDEX\\s*(IF\\s+NOT\\s+EXISTS)?\\s+([a-zA-Z0-9]+)\\s+ON\\s+([a-zA-Z0-9]+)\\s+\\((\\s*[a-zA-Z0-9]+)\\s*\\)$";
-//	string fullDropTable = "^\\s*DROP\\s+TABLE\\s+([a-zA-Z0-9]+)\\s*$";
-//	string fullDropIndex = "^\\s*DROP\\s+INDEX\\s+([a-zA-Z0-9]+)\\s*$";
-//	string fullDisplayTable = "^\\s*DISPLAY\\s+TABLE\\s+([a-zA-Z0-9]*)\\s*$";
-//	string fullInsertInto = "^\\s*INSERT\\s+INTO\\s+([a-zA-Z0-9]+)\\s+VALUES\\s*\\(((\\s*[a-zA-Z0-9\"']+\\s*,?\\s*)+)\\)\\s*$";
-//	string fullDeleteFrom = "^\\s*DELETE\\s+FROM\\s+([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s+=\\s+([a-zA-Z0-9\"']+)\\s*$";
-//	string fullSelect = "^\\s*SELECT\\s*((\\((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+\\))+|(ALL))\\s*FROM\\s+([a-zA-Z0-9]+)+\\s*(WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+))?$";
-//	string fullUpdate = "^\\s*UPDATE\\s+([a-zA-Z0-9]+)\\s+SET\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9\"']+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9\"']+)\\s*$";
-//};
-//
-////class RegexManager {
-////private:
-////	string* partialCommandStr = nullptr;
-////	string* fullCommandStr = nullptr;
-////	regex* RgxExp = nullptr;
-////	regex* RgxExpPartial = nullptr;
-////	int noCommands = 0;
-////public:
-////	RegexManager() {
-////		this->partialCommandStr = new string[noCommands];
-////		
-////	}
-////};
 
 // daca se adauga o comanda noua
 // trebuie modificat in 3 locuir

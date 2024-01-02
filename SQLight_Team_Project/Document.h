@@ -1,6 +1,6 @@
 #pragma once
 #include <fstream>
-#include "table_class.h"
+#include "Table.h"
 using namespace std;
 
 class Document
