@@ -11,14 +11,23 @@
 using namespace std;
 
 
-int main() {
+int main(int argc, char* argv[]) {
 	CmdProcessor buffer;
 	properFormats formats;
 	TableBuffer tableBuffer;
 	properFormats pf;
 
+	// Loading files using text files from the cmdl
+	while (--argc > 0) {
+		cout << endl << argv[argc] << endl;
+		buffer.insertCommands(string(argv[argc]), tableBuffer);
+		
+	}
+
+
+
 	/*try {
-		buffer.insertCommands(tableBuffer);
+		buffer.insertCommands("comenzi.txt", tableBuffer);
 	}
 	catch (exception& e) {
 		cout << endl << e.what();

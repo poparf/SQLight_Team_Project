@@ -102,14 +102,14 @@ public:
 		return 0;
 	}
 
-	void insertCommands(TableBuffer& tableBuffer) {
-		ifstream comenzi("comenzi.txt");
+	void insertCommands(string fileName, TableBuffer& tableBuffer) {
+		ifstream comenzi(fileName);
 		string comanda;
 		try {
 			if (comenzi.is_open()) {
 				while (getline(comenzi, comanda)) {
 					this->fullCmd = comanda;
-
+					cout << endl << fullCmd;
 					this->checkCmd(tableBuffer);
 				}
 				comenzi.close();
