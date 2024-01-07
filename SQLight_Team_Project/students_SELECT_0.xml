@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Table name="students_SELECT_0">
+	<Columns>
+		<Column name="id" />
+		<Column name="nume" />
+	</Columns>
+	<Rows>
+		<Row>
+			<Cell type="Number">53</Cell>
+			<Cell type="Text">'Amelia'</Cell>
+		</Row>
+		<Row>
+			<Cell type="Number">53</Cell>
+			<Cell type="Text">'Amelia'</Cell>
+		</Row>
+	</Rows>
+</Table>

@@ -130,6 +130,7 @@ public:
 	}
 
 	void printTableWithWhereClause(string colName, string value) {
+		
 		int colIndex = this->isColumn(colName);
 		if (colIndex == -1) {
 			throw exception("There is no column with this name.");
@@ -266,10 +267,126 @@ public:
 		delete[] this->rows;
 	}
 
+	Table filterTableWithWhereClauseAndSpecificColumns(string* colNamesToBePrinted, int noCols, string whereColumn, string valueToMatch, int noGen) {
+		int colIndexToBeMatched = isColumn(whereColumn);
+		if (colIndexToBeMatched == -1) {
+			throw exception("Wrong column name in the where clause.");
+		}
+
+		Column** newCols = new Column * [noCols];
+		int actualSizeNewCols = 0;
+
+		int* colIndexes = new int[noCols];
+		int noColIndexes = 0;
+
+		for (int i = 0; i < noCols; i++) {
+			int colIndex = this->isColumn(colNamesToBePrinted[i]);
+			if (colIndex != -1) {
+				newCols[actualSizeNewCols++] = new Column(*columns[colIndex]);
+				colIndexes[noColIndexes++] = colIndex;
+			}
+			else {
+				cout << endl << "Column " << colNamesToBePrinted[i] << " does not exist." << endl;
+			}
+		}
+
+		Table filteredTable(name + "_SELECT_" + to_string(noGen), newCols, actualSizeNewCols);
+
+		for (int i = 0; i < noRows; i++) {
+			Article** cells = rows[i]->getCells();
+			int noCells = rows[i]->getNoCells();
+
+			if (cells[colIndexToBeMatched]->getData() == valueToMatch) {
+				Article** newCells = new Article * [noColIndexes];
+
+				for (int j = 0; j < noColIndexes; j++) {
+					newCells[j] = new Article(*cells[colIndexes[j]]);
+				}
+
+				Row newRow(newCells, noColIndexes);
+				filteredTable.addRow(newRow); // Add matching rows with specific columns to the new table
+			}
+
+			for (int j = 0; j < noCells; j++) {
+				delete cells[j];
+			}
+			delete[] cells;
+		}
+
+		return filteredTable;
+	}
+
+
+	Table filterTableWithWhereClause(string colName, string value, int noGen) {
+		int colIndex = isColumn(colName);
+		if (colIndex == -1) {
+			throw exception("There is no column with this name.");
+		}
+
+		Table filteredTable(this->name + "_SELECT_" + to_string(noGen), this->columns, this->noColumns); // Create a new filtered table
+	
+
+		for (int i = 0; i < noRows; i++) {
+			int noCells = rows[i]->getNoCells();
+			Article** cells = rows[i]->getCells();
+			if (cells[colIndex]->getData() == value) {
+				Row r(cells, noCells);
+				filteredTable.addRow(r);
+			}
+
+			for (int j = 0; j < noCells; j++)
+				delete cells[j];
+			delete[] cells;
+		}
+
+		return filteredTable;
+	}
+
+	Table filterTableSpecificColumns(string* colNamesToBePrinted, int noCols, int noGen) {
+		//Table filteredTable(this->name + "_filtered", noCols, 0); // Create a new filtered table
+		Column** newCols = new Column * [noCols];
+		int actualSizeNewCols = 0;
+
+		int* colIndexes = new int[noCols];
+		int noColIndexes = 0;
+		for (int i = 0; i < noCols; i++) {
+			int colIndex = this->isColumn(colNamesToBePrinted[i]);
+			if (colIndex != -1) {
+				newCols[actualSizeNewCols++] = new Column(*columns[colIndex]);
+				colIndexes[noColIndexes++] = colIndex;
+			}
+			else {
+				cout << endl << "Column " << colNamesToBePrinted[i] << " does not exist." << endl;
+			}
+		}
+		Table filteredTable(this->name + "_SELECT_" + to_string(noGen), columns, actualSizeNewCols);
+		for (int i = 0; i < noRows; i++) {
+			Article** cells = this->rows[i]->getCells();
+			int noCells = this->rows[i]->getNoCells();
+			Article** newCells = new Article * [noColIndexes];
+			for (int j = 0; j < noColIndexes; j++) {
+				newCells[j] = new Article(*cells[colIndexes[j]]);
+			}
+
+			Row newRow(newCells, noColIndexes);
+			filteredTable.addRow(newRow); // Add rows with specific columns to the new table
+		}
+
+		return filteredTable;
+	}
+
+	
+
+
+
+
+
+
 	friend void operator<<(ostream& out, Table& table);
 	friend class outTable;
 	friend class inTable;
 	friend class xmlFile;
+	friend class csvTable;
 private:
 
 	void deleteRowByIndex(int index) {

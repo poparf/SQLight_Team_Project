@@ -54,7 +54,44 @@ class CmdProcessor
 private:
 	string fullCmd = "";
 	std::function<void(std::smatch, TableBuffer&)>* fun_ptr_array = nullptr;
+
+	bool xmlGeneration = 0;
+	bool csvGeneration = 0;
+	int noGen = 0;
+	
 public:
+
+	string activateXML() {
+		if (this->xmlGeneration) {
+			return "\nXML generation is already on.\n";
+		}
+		this->xmlGeneration = true;
+		return "\nXML generation activated.\n";
+	}
+
+	string deactivateXML() {
+		if (this->xmlGeneration == false) {
+			return "\nXML generation is already off.";
+		}
+		this->xmlGeneration = false;
+		return "\nXML generation deactivated.";
+	}
+	string activateCSV() {
+		if (this->csvGeneration) {
+			return "\nCSV generation is already on.\n";
+		}
+		this->csvGeneration = true;
+		return "\nCSV generation activated.\n";
+	}
+
+	string deactivateCSV() {
+		if (this->csvGeneration == false) {
+			return "\nCSV generation is already off.";
+		}
+		this->csvGeneration = false;
+		return "\nCSV generation deactivated.";
+	}
+
 
 	static const int noFunctions = 9;
 
@@ -258,9 +295,7 @@ private:
 		Table t = tb.getTable(tb.isTable(tableName));
 		cout << t;
 
-		// TODO: Generate a text file
-		xmlFile xml;
-		xml.generateXML(tableName + ".xml", t);
+		this->generateExtensions(t);
 	}
 
 	void insertInto(smatch matches, TableBuffer& tb) {
@@ -315,7 +350,6 @@ private:
 	}
 
 	void select(smatch matches, TableBuffer& tb) {
-
 		//cout << matches[1].str();		  // ce e in paranteza sau all
 		//cout << endl << matches[5].str(); // table name
 		//cout << endl << matches[7].str(); // coloana din where
@@ -323,7 +357,7 @@ private:
 		string tableName = matches[5].str();
 		loadTableIfNecessary(tableName, tb);
 
-		// TODO: Generate a text/HTML ? file
+
 		Table t = tb.getTable(tb.isTable(tableName));
 		if (toLowerCase(matches[1].str()) == "all") {
 			
@@ -331,7 +365,10 @@ private:
 				cout << t;
 			}
 			else {
-				t.printTableWithWhereClause(matches[7].str(), matches[8].str()); // rename this..
+				Table temp = t.filterTableWithWhereClause(matches[7].str(), matches[8].str(), this->noGen); // rename this..
+				cout << temp;
+				
+				generateExtensions(temp);
 			}
 		}
 		else {
@@ -352,7 +389,10 @@ private:
 					colNamesToBePrinted[j++] = match.str();
 				}
 				
-				t.printTableSpecificColumns(colNamesToBePrinted, noCols);
+				//t.printTableSpecificColumns(colNamesToBePrinted, noCols);
+				Table temp = t.filterTableSpecificColumns(colNamesToBePrinted, noCols, this->noGen); // rename this..
+				cout << temp;
+				generateExtensions(temp);
 			}
 			else {
 
@@ -375,7 +415,10 @@ private:
 
 				string whereColumn = matches[7].str();
 				string valueToMatch = matches[8].str();
-				t.printTableWithWhereClauseAndSpecificColumns(colNamesToBePrinted, noCols, whereColumn, valueToMatch); // rename this..
+				//t.printTableWithWhereClauseAndSpecificColumns(colNamesToBePrinted, noCols, whereColumn, valueToMatch); // rename this..
+				Table temp = t.filterTableWithWhereClauseAndSpecificColumns(colNamesToBePrinted, noCols, whereColumn, valueToMatch, noGen); // rename this..
+				cout << temp;
+				generateExtensions(temp);
 			}
 		}		
 	}
@@ -411,6 +454,7 @@ private:
 		tb.replaceTable(t);
 		outTable ot;
 		ot.write(tableName + ".bin", t);
+		this->generateExtensions(t);
 		return;
 	}
 	
@@ -428,6 +472,20 @@ private:
 			inTable it;
 			it.readIntoBuffer(tableNameInput + ".bin", tb);
 			f.close();
+		}
+	}
+
+	void generateExtensions(Table& t) {
+		if (this->xmlGeneration == true) {
+			xmlFile xml;
+			xml.generateXML(t.getName(), t);
+		}
+		if (this->csvGeneration == true) {
+			csvTable csv;
+			csv.generateCSV(t.getName(), t);
+		}
+		if (this->csvGeneration || this->xmlGeneration) {
+			this->noGen++;
 		}
 	}
 };

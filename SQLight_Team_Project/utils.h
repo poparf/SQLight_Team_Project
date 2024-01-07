@@ -1,7 +1,7 @@
 #pragma once
 
 using namespace std;
-#define NO_SECONDARY_COMMANDS 3
+#define NO_SECONDARY_COMMANDS 7
 
 string toLowerCase(string input) {
 	for (int i = 0; i < input.length(); i++) {
@@ -17,7 +17,7 @@ void printLine() {
 }
 
 int checkSecondaryCommand(string fullCmd) {
-	string additionalCommands[NO_SECONDARY_COMMANDS] = { "/quit", "/clear", "/help" };
+	string additionalCommands[NO_SECONDARY_COMMANDS] = { "/quit", "/clear", "/help", "/activate csv", "/activate xml", "/deactivate xml", "/deactivate csv"};
 
 	for (int i = 0; i < NO_SECONDARY_COMMANDS; i++) {
 		if (fullCmd == additionalCommands[i]) {

@@ -58,12 +58,32 @@ int main(int argc, char* argv[]) {
 					break;
 				case 3:
 					cout << endl << "Available commands at this point:";
+					cout << "\n" << "/activate xml";
+					cout << "\n" << "/activate csv";
+					cout << "\n" << "/deactivate xml";
+					cout << "\n" << "/deactivate csv";
 					cout << "\n" << "/quit";
 					cout << "\n" << "/clear";
 					for (int i = 0; i < pf.noFormats; i++) {
 						cout << "\n" << pf.formats[i];
 					}
 					
+					break;
+				case 4:
+					// csv
+					cout << buffer.activateCSV();
+					break;
+				case 5:
+					// xml
+					cout << buffer.activateXML();
+					break;
+				case 6:
+					// deactivate xml
+					cout << buffer.deactivateXML();
+					break;
+				case 7:
+					// deactivate csv
+					cout << buffer.deactivateCSV();
 					break;
 				default:
 					if (!buffer.checkCmd(tableBuffer)) {

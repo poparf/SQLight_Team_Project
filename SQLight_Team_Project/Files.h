@@ -187,9 +187,9 @@ public:
 		if (xmlTable.is_open())
 			xmlTable.close();
 	}
-	// Please also include the file extension .xml
+	// Do not include a header.
 	void generateXML(string tableName, Table& t) {
-		this->xmlTable.open(tableName);
+		this->xmlTable.open(tableName + ".xml");
 
 		xmlTable << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 		xmlTable << "<Table name=\"" << t.name << "\">\n";
@@ -222,3 +222,42 @@ public:
 		xmlTable << "</Table>\n";
 	}
 };
+
+
+class csvTable {
+protected:
+	ofstream csvFile;
+public:
+	// Do not include a header.
+	void generateCSV(string tableName, Table & t) {
+		csvFile.open(tableName + ".csv");
+
+		// Write header row with column names
+		for (int i = 0; i < t.noColumns; ++i) {
+			csvFile << t.columns[i]->getName();
+			if (i < t.noColumns - 1) {
+				csvFile << ",";
+			}
+		}
+		csvFile << "\n";
+
+		// Write data rows
+		for (int i = 0; i < t.noRows; ++i) {
+			Article** cells = t.rows[i]->getCells();
+			for (int j = 0; j < t.noColumns; ++j) {
+				csvFile << cells[j]->getData();
+				if (j < t.noColumns - 1) {
+					csvFile << ",";
+				}
+			}
+			csvFile << "\n";
+		}
+	}
+
+	~csvTable() {
+		if(csvFile.is_open())
+			csvFile.close();
+	}
+};
+
+
