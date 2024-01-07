@@ -136,11 +136,11 @@ public:
 		}
 		cout << endl << this->name << endl;
 
-		cout << "Columns" << endl;
+		cout << "Columns:" << endl;
 		for (int i = 0; i < this->noColumns; i++) {
 			cout << this->columns[i]->getName() << " ";
 		}
-		cout << endl << "Rows" << endl;
+		cout << endl << "Rows:" << endl;
 
 		for (int i = 0; i < this->noRows; i++) {
 			int noCells = this->rows[i]->getNoCells();
@@ -153,6 +153,37 @@ public:
 				cout << endl;
 			}
 		}
+	}
+
+	void printTableSpecificColumns(string* colNamesToBePrinted, int noCols) {
+		int* colIndexes = new int[noCols];
+
+		for (int i = 0; i < noCols; i++) {
+			colIndexes[i] = this->isColumn(colNamesToBePrinted[i]);
+			if (colIndexes[i] == -1) {
+				cout << endl << "Column " << colNamesToBePrinted[i] << " does not exist." << endl;
+			}
+		}
+
+		cout << endl << "Columns:" << endl;
+		for (int i = 0; i < noCols; i++) {
+			if (colIndexes[i] != -1) {
+				cout << colNamesToBePrinted[i] << " ";
+			}
+		}
+
+		cout << endl << "Rows:";
+
+		for (int i = 0; i < this->noRows; i++) {
+			cout << endl;
+			
+			int noCells = this->rows[i]->getNoCells();
+			Article** cells = this->rows[i]->getCells();
+			for (int j = 0; j < noCols; j++) {
+				cout << cells[colIndexes[j]]->getData() << " ";
+			}
+		}
+
 	}
 
 	void printTableWithWhereClauseAndSpecificColumns(string* colNamesToBePrinted, int noCols, string whereColumn, string valueToMatch) {
@@ -170,29 +201,27 @@ public:
 			}
 		}
 
-		cout << endl;
+		cout << endl << "Columns:" << endl;
 		for (int i = 0; i < noCols; i++) {
 			if (colIndexes[i] != -1) {
 				cout << colNamesToBePrinted[i] << " ";
 			}
 		}
 
-		cout << endl << "Rows" << endl;
+		cout << endl << "Rows:";
 
 		for (int i = 0; i < this->noRows; i++) {
-			cout << endl;
 			int noCells = this->rows[i]->getNoCells();
 			Article** cells = this->rows[i]->getCells();
 
 			
 			if (cells[colIndexToBeMatched]->getData() == valueToMatch) {
+				cout << endl;
 				for (int j = 0; j < noCols; j++) {
 					cout << cells[colIndexes[j]]->getData() << " ";
 				}
-			}
-			
+			}	
 		}
-	
 	}
 
 	string getName() {
@@ -202,6 +231,25 @@ public:
 	int getNoRows() {
 		return this->noRows;
 	}
+
+	void update(string setColName, string setValueName, string whereColName, string whereValueName, int whereColIndex, int setColIndex) {
+		
+		Row** newRows = new Row * [this->noRows];
+		
+		for (int i = 0; i < this->noRows; i++) {
+			int noCells = this->rows[i]->getNoCells();
+			Article** cells = this->rows[i]->getCells();
+
+			if (cells[whereColIndex]->getData() == whereValueName) {
+				cells[setColIndex]->setData(setValueName);
+			}
+			newRows[i] = new Row(cells, noCells);
+		}
+
+		this->deleteRows();
+		this->rows = newRows;
+	}
+
 
 	// Destructor
 	~Table() {
@@ -221,6 +269,7 @@ public:
 	friend void operator<<(ostream& out, Table& table);
 	friend class outTable;
 	friend class inTable;
+	friend class xmlFile;
 private:
 
 	void deleteRowByIndex(int index) {

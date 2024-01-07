@@ -259,6 +259,8 @@ private:
 		cout << t;
 
 		// TODO: Generate a text file
+		xmlFile xml;
+		xml.generateXML(tableName + ".xml", t);
 	}
 
 	void insertInto(smatch matches, TableBuffer& tb) {
@@ -314,10 +316,10 @@ private:
 
 	void select(smatch matches, TableBuffer& tb) {
 
-		cout << matches[1].str();		  // ce e in paranteza sau all
-		cout << endl << matches[5].str(); // table name
-		cout << endl << matches[7].str(); // coloana din where
-		cout << endl << matches[8].str(); // valoarea din where
+		//cout << matches[1].str();		  // ce e in paranteza sau all
+		//cout << endl << matches[5].str(); // table name
+		//cout << endl << matches[7].str(); // coloana din where
+		//cout << endl << matches[8].str(); // valoarea din where
 		string tableName = matches[5].str();
 		loadTableIfNecessary(tableName, tb);
 
@@ -333,34 +335,82 @@ private:
 			}
 		}
 		else {
-			// You have to print only specific columns
-			regex partitionRegex("[^ ,)(][a-zA-Z0-9\"'\\s*]*");
-			string paranteza = matches[1].str();
+			if (matches[7].str() == "") {
+				regex partitionRegex("[^ ,)(][a-zA-Z0-9\"'\\s*]*");
+				string paranteza = matches[1].str();
 
-			auto words_begin = sregex_iterator(paranteza.begin(), paranteza.end(), partitionRegex);
-			auto words_end = sregex_iterator();
+				auto words_begin = sregex_iterator(paranteza.begin(), paranteza.end(), partitionRegex);
+				auto words_end = sregex_iterator();
 
-			int noCols = distance(words_begin, words_end);
-			
+				int noCols = distance(words_begin, words_end);
 
-			int j = 0;
-			string* colNamesToBePrinted = new string[noCols];
-			for (sregex_iterator i = words_begin; i != words_end; ++i) {
-				smatch match = *i;
-				colNamesToBePrinted[j++] = match.str();
+
+				int j = 0;
+				string* colNamesToBePrinted = new string[noCols];
+				for (sregex_iterator i = words_begin; i != words_end; ++i) {
+					smatch match = *i;
+					colNamesToBePrinted[j++] = match.str();
+				}
+				
+				t.printTableSpecificColumns(colNamesToBePrinted, noCols);
 			}
+			else {
 
-			string whereColumn = matches[7].str();
-			string valueToMatch = matches[8].str();
-			t.printTableWithWhereClauseAndSpecificColumns(colNamesToBePrinted, noCols, whereColumn, valueToMatch); // rename this..
-		}
+				// You have to print only specific columns
+				regex partitionRegex("[^ ,)(][a-zA-Z0-9\"'\\s*]*");
+				string paranteza = matches[1].str();
 
-			
+				auto words_begin = sregex_iterator(paranteza.begin(), paranteza.end(), partitionRegex);
+				auto words_end = sregex_iterator();
+
+				int noCols = distance(words_begin, words_end);
+
+
+				int j = 0;
+				string* colNamesToBePrinted = new string[noCols];
+				for (sregex_iterator i = words_begin; i != words_end; ++i) {
+					smatch match = *i;
+					colNamesToBePrinted[j++] = match.str();
+				}
+
+				string whereColumn = matches[7].str();
+				string valueToMatch = matches[8].str();
+				t.printTableWithWhereClauseAndSpecificColumns(colNamesToBePrinted, noCols, whereColumn, valueToMatch); // rename this..
+			}
+		}		
 	}
 
-	void update(smatch matches, TableBuffer& tableBuffer) {
+	void update(smatch matches, TableBuffer& tb) {
+		//cout << endl << matches[1].str(); // table name
+		//cout << endl << matches[2].str(); // SET Column
+		//cout << endl << matches[3].str(); // SET Value
+		//cout << endl << matches[4].str(); // WHERE Column
+		//cout << endl << matches[5].str(); // WHERE Value
 
+		this->loadTableIfNecessary(matches[1].str(), tb);
+		string tableName = matches[1].str();
+		Table t = tb.getTable(tb.isTable(matches[1].str()));
+		
+		string setColumnName = matches[2].str();
+		int setColIndex = t.isColumn(setColumnName);
+		if (setColIndex == -1) {
+			throw exception("ERROR: Unknown column name in SET.");
+		}
+		
+		string setValueName = matches[3].str();
 
+		string whereColumnName = matches[4].str();
+		int whereColumnIndex = t.isColumn(whereColumnName);
+		if (whereColumnIndex == -1) {
+			throw exception("ERROR: Unknown column name in WHERE clause.");
+		}
+
+		string whereValueName = matches[5].str();
+
+		t.update(setColumnName, setValueName, whereColumnName, whereValueName, whereColumnIndex, setColIndex);
+		tb.replaceTable(t);
+		outTable ot;
+		ot.write(tableName + ".bin", t);
 		return;
 	}
 	

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Table name="students">
+	<Columns>
+		<Column name="id" />
+		<Column name="nume" />
+		<Column name="grupa" />
+	</Columns>
+	<Rows>
+		<Row>
+			<Cell type="Number">1</Cell>
+			<Cell type="Text">"Robert"</Cell>
+			<Cell type="Text">"1072"</Cell>
+		</Row>
+		<Row>
+			<Cell type="Number">51</Cell>
+			<Cell type="Text">'Sophia'</Cell>
+			<Cell type="Text">'1073'</Cell>
+		</Row>
+		<Row>
+			<Cell type="Number">52</Cell>
+			<Cell type="Text">'Mason'</Cell>
+			<Cell type="Text">'1071'</Cell>
+		</Row>
+		<Row>
+			<Cell type="Number">53</Cell>
+			<Cell type="Text">'Amelia'</Cell>
+			<Cell type="Text">'1072'</Cell>
+		</Row>
+		<Row>
+			<Cell type="Number">53</Cell>
+			<Cell type="Text">'Amelia'</Cell>
+			<Cell type="Text">'1072'</Cell>
+		</Row>
+	</Rows>
+</Table>

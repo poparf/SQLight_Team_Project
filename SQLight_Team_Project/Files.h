@@ -176,5 +176,49 @@ public:
 };
 
 
-// col def value nu se scrie corect
-// insert ul nu ramane
+class xmlFile {
+protected:
+	ofstream xmlTable;
+public:
+
+	xmlFile() {};
+
+	~xmlFile() {
+		if (xmlTable.is_open())
+			xmlTable.close();
+	}
+	// Please also include the file extension .xml
+	void generateXML(string tableName, Table& t) {
+		this->xmlTable.open(tableName);
+
+		xmlTable << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
+		xmlTable << "<Table name=\"" << t.name << "\">\n";
+
+		// Write columns
+		xmlTable << "\t<Columns>\n";
+		for (int i = 0; i < t.noColumns; ++i) {
+			xmlTable << "\t\t<Column name=\"" << t.columns[i]->getName() << "\" />\n";
+		}
+		xmlTable << "\t</Columns>\n";
+
+		// Write rows
+		xmlTable << "\t<Rows>\n";
+		for (int i = 0; i < t.noRows; ++i) {
+			xmlTable << "\t\t<Row>\n";
+			Article** cells = t.rows[i]->getCells();
+			for (int j = 0; j < t.noColumns; ++j) {
+				if (t.columns[j]->getType() == columnTypes::TEXT) {
+					xmlTable << "\t\t\t<Cell type=\"" << "Text" << "\">" << cells[j]->getData() << "</Cell>\n";
+				}
+				else {
+					xmlTable << "\t\t\t<Cell type=\"" << "Number" << "\">" << cells[j]->getData() << "</Cell>\n";
+				}
+
+				
+			}
+			xmlTable << "\t\t</Row>\n";
+		}
+		xmlTable << "\t</Rows>\n";
+		xmlTable << "</Table>\n";
+	}
+};
