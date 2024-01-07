@@ -26,12 +26,12 @@ int main(int argc, char* argv[]) {
 
 
 
-	/*try {
+	try {
 		buffer.insertCommands("comenzi.txt", tableBuffer);
 	}
 	catch (exception& e) {
 		cout << endl << e.what();
-	}*/
+	}
 	
 
 	while (1) {

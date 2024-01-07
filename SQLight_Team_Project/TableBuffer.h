@@ -26,23 +26,17 @@ public:
 	}
 
 	void removeTable(int index) {
-		if (index > this->noTables || index < 0)
-			throw exception("Index is out of range.");
-
-		Table** newTables = new Table * [this->noTables - 1];
-
-		int j = 0;
-		for (int i = 0; i < this->noTables; i++) {
-			if (i == index) {
-				i++; // skip that table
+			if (index < 0 || index >= this->noTables) {
+				throw exception("Invalid row index");
 			}
-			newTables[j++] = new Table(*this->tables[i]);
-		}
 
-		this->deleteTables();
 
-		this->tables = newTables;
-		this->noTables -= 1;
+			for (int i = index; i < this->noTables - 1; i++) {
+				*this->tables[i] = *this->tables[i + 1];
+			}
+
+			this->tables[this->noTables - 1] = nullptr;
+			this->noTables--;
 	}
 
 	// Returns the index of the table if exists else returns -1

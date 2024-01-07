@@ -51,9 +51,11 @@ public:
 
 	// Write one more row and change the number of rows in the file
 	void writeRow(string fileName, Row row, int actualNoRows) {
-		file.open(fileName, ios::binary | ios::app); // this clears the file .. .not good
+		file.open(fileName, ios::binary | ios::in | ios::out); // this clears the file .. .not good
 		if (!file.is_open())
 			throw exception("File could not be opened when inserting a row.");
+
+		file.seekp(0, ios::end);
 
 		Article** cells = row.getCells();
 		int noCells = row.getNoCells();
@@ -68,10 +70,10 @@ public:
 			file.write(data.c_str(), sizeof(char) * dataSize);
 		}
 
+		
 		// Change the number of rows in the file
-		file.seekp(sizeof(int), SEEK_SET);
+		file.seekp(sizeof(int), ios::beg);
 		file.write((char*)&actualNoRows, sizeof(int));
-		file.seekp(0, SEEK_END);
 	}
 
 	~outTable() {

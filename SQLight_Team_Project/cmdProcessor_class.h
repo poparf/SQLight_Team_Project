@@ -253,49 +253,24 @@ private:
 		
 		string tableName = matches[1].str();
 		// Checking the buffer
-		int index = tb.isTable(tableName);
-		if (index == -1) {
-			// Checking the files
-			ifstream file(tableName + ".bin", ios::binary);
-			if (file.is_open()) {
-				inTable it;
-				it.readIntoBuffer(tableName + ".bin", tb);
-				file.close();
-			}
-			else {
-				throw exception("There is no table with this name.");
-			}
-		}
+		loadTableIfNecessary(tableName, tb);
 
 		Table t = tb.getTable(tb.isTable(tableName));
 		cout << t;
+
+		// TODO: Generate a text file
 	}
 
 	void insertInto(smatch matches, TableBuffer& tb) {
 	//	// matches[1] =  table name
 	//	// matches[2] = ce e in paranteza
 		string tableNameInput = matches[1].str();
-		int index = tb.isTable(tableNameInput);
 
-		if (index == -1) {
-			//cout << endl << "The table is not in the buffer. Let's check files"
-			ifstream f(tableNameInput + ".bin", ios::binary);
-			if (f.is_open()) {
-				// file exists so we load it
-				inTable it;
-				it.readIntoBuffer(tableNameInput + ".bin", tb);
-				f.close();
-			}
-			else {
-				throw exception("INSERT_ERROR: There is no table with this name.");
-			}
-		}
+		loadTableIfNecessary(tableNameInput, tb);
 
 		Table t = tb.getTable(tb.isTable(tableNameInput));
 
 		regex partitionRegex("[^ ,][a-zA-Z0-9\"'\\s*]*");
-
-		smatch input;
 		string paranteza = matches[2].str();
 
 		auto words_begin = sregex_iterator(paranteza.begin(), paranteza.end(), partitionRegex);
@@ -314,80 +289,95 @@ private:
 		t.addRow(row);
 		tb.replaceTable(t);
 		outTable ot; 
-		//ot.writeRow(tableNameInput + ".bin", row, t.getNoRows());
-		ot.write(tableNameInput + ".bin", t);
+		ot.writeRow(tableNameInput + ".bin", row, t.getNoRows());
+		//ot.write(tableNameInput + ".bin", t);
 		for (int i = 0; i < noCells; i++) {
 			delete cells[i];
 		}
 		delete[] cells;
 	}
 
-	// Deletes one column from a table
-	void deleteFrom(smatch matches, TableBuffer& tableBuffer) {
+	// Deletes rows from a table
+	void deleteFrom(smatch matches, TableBuffer& tb) {
+		string tableName = matches[1].str();
+		// Checking the buffer
+		loadTableIfNecessary(tableName, tb);
 
-	
+		Table t = tb.getTable(tb.isTable(tableName));
+
+		t.deleteFrom(matches[2].str(), matches[3].str());
+		tb.replaceTable(t);
+		outTable ot;
+		ot.write(matches[1].str() + ".bin", t);
 		return;
 	}
 
-	void select(smatch matches, TableBuffer& tableBuffer) {
+	void select(smatch matches, TableBuffer& tb) {
 
+		cout << matches[1].str();		  // ce e in paranteza sau all
+		cout << endl << matches[5].str(); // table name
+		cout << endl << matches[7].str(); // coloana din where
+		cout << endl << matches[8].str(); // valoarea din where
+		string tableName = matches[5].str();
+		loadTableIfNecessary(tableName, tb);
 
-		////cout << matches[1].str();		  // ce e in paranteza sau all
-		////cout << endl << matches[5].str(); // table name
-		////cout << endl << matches[7].str(); // coloana din where
-		////cout << endl << matches[8].str(); // valoarea din where
+		// TODO: Generate a text/HTML ? file
+		Table t = tb.getTable(tb.isTable(tableName));
+		if (toLowerCase(matches[1].str()) == "all") {
+			
+			if (matches[7].str() == "") {
+				cout << t;
+			}
+			else {
+				t.printTableWithWhereClause(matches[7].str(), matches[8].str()); // rename this..
+			}
+		}
+		else {
+			// You have to print only specific columns
+			regex partitionRegex("[^ ,)(][a-zA-Z0-9\"'\\s*]*");
+			string paranteza = matches[1].str();
 
-		//if (!tableBuffer.doesTableExist(matches[5].str())) {
-		//	
-		//	throw exception("There is no table with that name.");
-		//	
-		//	/*
-		//	cout << endl << "There is no table with name: " << matches[1].str() << " in buffer.";
-		//	cout << endl << "Let's check in files.";
-		//	inTable fTable(tableNameInput);
+			auto words_begin = sregex_iterator(paranteza.begin(), paranteza.end(), partitionRegex);
+			auto words_end = sregex_iterator();
 
-		//	foundTable = fTable.getTable();
-		//	tableBuffer = tableBuffer + foundTable;*/
-		//}
-		//	
-		//if (toLowerCase(matches[1].str()) == "all") {
+			int noCols = distance(words_begin, words_end);
+			
 
-		//	if (matches[7] == "") {
-		//		int size = tableBuffer.getNoTables();
-		//		Table* tables = tableBuffer.getTables();
+			int j = 0;
+			string* colNamesToBePrinted = new string[noCols];
+			for (sregex_iterator i = words_begin; i != words_end; ++i) {
+				smatch match = *i;
+				colNamesToBePrinted[j++] = match.str();
+			}
 
-		//		for (int i = 0; i < size; i++) {
-		//			if (matches[5].str() == tables[i].getName()) {
-		//				cout << tables[i];
-		//				delete[] tables;
-		//				return;
-		//			}
-		//		}
-		//	}
-		//	else {
-		//		int size = tableBuffer.getNoTables();
-		//		Table* tables = tableBuffer.getTables();
-		//		for (int i = 0; i < size; i++) {
-		//			if (matches[5].str() == tables[i].getName()) {
-		//				tables[i].printTableWhere(matches[7].str(), matches[8].str());
-		//				delete[] tables;
-		//				return;
-		//			}
-		//		}
+			string whereColumn = matches[7].str();
+			string valueToMatch = matches[8].str();
+			t.printTableWithWhereClauseAndSpecificColumns(colNamesToBePrinted, noCols, whereColumn, valueToMatch); // rename this..
+		}
 
-
-		//	}
-		//}
-
-
-
-
-		//return;
+			
 	}
 
 	void update(smatch matches, TableBuffer& tableBuffer) {
 
 
 		return;
+	}
+	
+
+private:
+	void loadTableIfNecessary(string tableNameInput, TableBuffer& tb) {
+		if (tb.isTable(tableNameInput) == -1) {
+			// Check if the file exists
+			ifstream f(tableNameInput + ".bin", ios::binary);
+			if (!f.is_open()) {
+				throw exception("INSERT_ERROR: There is no table with this name.");
+			}
+
+			// Load the table from the file
+			inTable it;
+			it.readIntoBuffer(tableNameInput + ".bin", tb);
+			f.close();
+		}
 	}
 };

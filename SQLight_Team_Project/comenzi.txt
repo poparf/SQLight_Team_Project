@@ -3,4 +3,5 @@ INSERT INTO students VALUES (1,"Robert", "1072")
 INSERT INTO students VALUES (51, 'Sophia', '1073')
 INSERT INTO students VALUES (52, 'Mason', '1071')
 INSERT INTO students VALUES (53, 'Amelia', '1072')
+INSERT INTO students VALUES (53, 'Amelia', '1072')
 DISPLAY TABLE students
