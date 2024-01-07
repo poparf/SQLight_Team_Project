@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output method="xml" indent="yes"/>
+
+  <xsl:template match="/">
+    <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+              xmlns:o="urn:schemas-microsoft-com:office:office"
+              xmlns:x="urn:schemas-microsoft-com:office:excel"
+              xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+              xmlns:html="http://www.w3.org/TR/REC-html40">
+      <Worksheet>
+        <Table>
+          <!-- Add headers -->
+          <Row>
+            <Cell><Data ss:Type="String">ID</Data></Cell>
+            <Cell><Data ss:Type="String">Name</Data></Cell>
+            <Cell><Data ss:Type="String">Group</Data></Cell>
+          </Row>
+          <!-- Convert data rows -->
+          <xsl:apply-templates select="//Row"/>
+        </Table>
+      </Worksheet>
+    </Workbook>
+  </xsl:template>
+
+  <xsl:template match="Row">
+    <Row>
+      <Cell><Data ss:Type="Number"><xsl:value-of select="Cell[1]"/></Data></Cell>
+      <Cell><Data ss:Type="String"><xsl:value-of select="Cell[2]"/></Data></Cell>
+      <Cell><Data ss:Type="String"><xsl:value-of select="Cell[3]"/></Data></Cell>
+    </Row>
+  </xsl:template>
+</xsl:stylesheet>

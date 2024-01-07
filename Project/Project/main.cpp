@@ -5,20 +5,29 @@
 #include <fstream>
 #include "utils.h"
 #include "cmdProcessor_class.h"
-#include "table_class.h"
-#include "Document.h"
+#include "TableBuffer.h"
+#include "Files.h"
 #include "RgxManager.h"
 using namespace std;
 
 
-int main() {
+int main(int argc, char* argv[]) {
 	CmdProcessor buffer;
 	properFormats formats;
 	TableBuffer tableBuffer;
 	properFormats pf;
 
+	// Loading files using text files from the cmdl
+	while (--argc > 0) {
+		cout << endl << argv[argc] << endl;
+		buffer.insertCommands(string(argv[argc]), tableBuffer);
+		
+	}
+
+
+
 	try {
-		buffer.insertCommands(tableBuffer);
+		buffer.insertCommands("comenzi.txt", tableBuffer);
 	}
 	catch (exception& e) {
 		cout << endl << e.what();
@@ -49,12 +58,32 @@ int main() {
 					break;
 				case 3:
 					cout << endl << "Available commands at this point:";
+					cout << "\n" << "/activate xml";
+					cout << "\n" << "/activate csv";
+					cout << "\n" << "/deactivate xml";
+					cout << "\n" << "/deactivate csv";
 					cout << "\n" << "/quit";
 					cout << "\n" << "/clear";
 					for (int i = 0; i < pf.noFormats; i++) {
 						cout << "\n" << pf.formats[i];
 					}
 					
+					break;
+				case 4:
+					// csv
+					cout << buffer.activateCSV();
+					break;
+				case 5:
+					// xml
+					cout << buffer.activateXML();
+					break;
+				case 6:
+					// deactivate xml
+					cout << buffer.deactivateXML();
+					break;
+				case 7:
+					// deactivate csv
+					cout << buffer.deactivateCSV();
 					break;
 				default:
 					if (!buffer.checkCmd(tableBuffer)) {

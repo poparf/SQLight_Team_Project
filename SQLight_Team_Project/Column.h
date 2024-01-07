@@ -1,24 +1,30 @@
 #pragma once
-#include "utils.h"
-
 using namespace std;
 
 enum columnTypes { INTEGER, FLOAT, TEXT };
 
 class Column {
 private:
-	string columnName;
+	string name;
 	columnTypes type = columnTypes::TEXT;
 	int size = 0;
-	string defaultValue = "";
+	string def = "";
 public:
 
-	void setDefaultValue(string input) {
-		this->defaultValue = input;
+	Column(string name, columnTypes type, int size, string def) {
+		this->setName(name);
+		this->setType(type);
+		this->setSize(size);
+		this->setDef(def);
 	}
 
-	void setColumnName(string input) {
-		this->columnName = input;
+
+	void setDef(string input) {
+		this->def = input;
+	}
+
+	void setName(string input) {
+		this->name = input;
 	}
 
 	void setType(columnTypes type) {
@@ -26,11 +32,14 @@ public:
 	}
 
 	void setSize(int input) {
+		if (input < 0) {
+			throw exception("The column maximum size must be positive.");
+		}
 		this->size = input;
 	}
 
-	string getColumnName() {
-		return this->columnName;
+	string getName() {
+		return this->name;
 	}
 
 	int getSize() {
@@ -41,15 +50,15 @@ public:
 		return this->type;
 	}
 
-	string getDefaultValue() {
-		return this->defaultValue;
+	string getDef() {
+		return this->def;
 	}
 };
 
 void operator<<(ostream& console, Column col) {
-	console << endl << "Column name: " << col.getColumnName();
+	console << endl << "Column name: " << col.getName();
 	console << endl << "Type: " << col.getType();
 	console << endl << "Size: " << col.getSize();
-	console << endl << "Default: " << col.getDefaultValue();
+	console << endl << "Default: " << col.getDef();
 	console << endl << "~~~~~~~~~~~~~~~~";
 }
