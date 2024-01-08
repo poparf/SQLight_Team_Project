@@ -1,4 +1,4 @@
-9
+10
 ^\s*CREATE\s+TABLE\s*
 ^\s*CREATE\s+INDEX\s*
 ^\s*DROP\s+TABLE\s*
@@ -8,3 +8,4 @@
 ^\s*DELETE\s+FROM\s*
 ^\s*SELECT\s*
 ^\s*UPDATE\s*
+^\s*IMPORT\s*

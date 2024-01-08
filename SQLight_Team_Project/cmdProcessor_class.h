@@ -20,7 +20,7 @@ using namespace std;
 class properFormats {
 public:
 	string* formats = nullptr;
-	int noFormats = 9;
+	int noFormats = 10;
 
 	properFormats() {
 		formats = new string[this->noFormats];
@@ -34,6 +34,7 @@ public:
 		formats[6] = "DELETE FROM table_name WHERE column_name = value (deletes allows only one column in the where clause)";
 		formats[7] = "SELECT (at_least_one_column, ...) | ALL FROM table_name [WHERE column_name = value] - the where clause is optional";
 		formats[8] = "UPDATE table_name SET column_name = value WHERE  column_name = value (the SET column may be different than the WHERE one)";
+		formats[9] = "IMPORT table_name file_name";
 	}
 
 
@@ -53,7 +54,7 @@ class CmdProcessor
 {
 private:
 	string fullCmd = "";
-	std::function<void(std::smatch, TableBuffer&)>* fun_ptr_array = nullptr;
+	function<void(smatch, TableBuffer&)>* fun_ptr_array = nullptr;
 
 	bool xmlGeneration = 0;
 	bool csvGeneration = 0;
@@ -93,19 +94,20 @@ public:
 	}
 
 
-	static const int noFunctions = 9;
+	static const int noFunctions = 10;
 
 	CmdProcessor() {
-		fun_ptr_array = new std::function<void(std::smatch, TableBuffer&)>[noFunctions];
-		fun_ptr_array[0] = std::bind(&CmdProcessor::createTable, this, std::placeholders::_1, std::placeholders::_2);
-		fun_ptr_array[1] = std::bind(&CmdProcessor::createIndex, this, std::placeholders::_1, std::placeholders::_2);;
-		fun_ptr_array[2] = std::bind(&CmdProcessor::dropTable, this, std::placeholders::_1, std::placeholders::_2);;
-		fun_ptr_array[3] = std::bind(&CmdProcessor::dropIndex, this, std::placeholders::_1, std::placeholders::_2);;
-		fun_ptr_array[4] = std::bind(&CmdProcessor::displayTable, this, std::placeholders::_1, std::placeholders::_2);;
-		fun_ptr_array[5] = std::bind(&CmdProcessor::insertInto, this, std::placeholders::_1, std::placeholders::_2);;
-		fun_ptr_array[6] = std::bind(&CmdProcessor::deleteFrom, this, std::placeholders::_1, std::placeholders::_2);;
-		fun_ptr_array[7] = std::bind(&CmdProcessor::select, this, std::placeholders::_1, std::placeholders::_2);;
-		fun_ptr_array[8] = std::bind(&CmdProcessor::update, this, std::placeholders::_1, std::placeholders::_2);;
+		fun_ptr_array = new function<void(smatch, TableBuffer&)>[noFunctions];
+		fun_ptr_array[0] = bind(&CmdProcessor::createTable, this, placeholders::_1, placeholders::_2);
+		fun_ptr_array[1] = bind(&CmdProcessor::createIndex, this, placeholders::_1, placeholders::_2);
+		fun_ptr_array[2] = bind(&CmdProcessor::dropTable, this, placeholders::_1, placeholders::_2);
+		fun_ptr_array[3] = bind(&CmdProcessor::dropIndex, this, placeholders::_1, placeholders::_2);
+		fun_ptr_array[4] = bind(&CmdProcessor::displayTable, this, placeholders::_1, placeholders::_2);
+		fun_ptr_array[5] = bind(&CmdProcessor::insertInto, this, placeholders::_1, placeholders::_2);
+		fun_ptr_array[6] = bind(&CmdProcessor::deleteFrom, this, placeholders::_1, placeholders::_2);
+		fun_ptr_array[7] = bind(&CmdProcessor::select, this, placeholders::_1, placeholders::_2);
+		fun_ptr_array[8] = bind(&CmdProcessor::update, this, placeholders::_1, placeholders::_2);
+		fun_ptr_array[9] = bind(&CmdProcessor::importCSV, this, placeholders::_1, placeholders::_2);
 	}
 
 	bool checkCmd(TableBuffer& tableBuffer) {
@@ -217,10 +219,10 @@ private:
 		int j = 0;
 		int k = 0;
 		// aici nu putem folosi i pentru ca e de tipul regex iterator nu int
-		for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
+		for (sregex_iterator i = words_begin; i != words_end; ++i) {
 
-			std::smatch match = *i;
-			std::string match_str = match.str();
+			smatch match = *i;
+			string match_str = match.str();
 			switch (k) {
 			case 0:
 				cols[j]->setName(match_str);
@@ -458,6 +460,18 @@ private:
 		return;
 	}
 	
+
+	void importCSV(smatch matches, TableBuffer& tb) {
+	
+	//	cout << endl << matches[1].str(); // table name
+	//	cout << endl << matches[2].str(); // filename
+
+		loadTableIfNecessary(matches[1].str(), tb);
+		csvTable csv;
+		Table t = tb.getTable(tb.isTable(matches[1].str()));
+		csv.readCSV(matches[2].str(), t);
+		tb.replaceTable(t);
+	}
 
 private:
 	void loadTableIfNecessary(string tableNameInput, TableBuffer& tb) {

@@ -1,4 +1,7 @@
 #pragma once
+
+#include <sstream>
+
 // A class that writes the table in a binary format
 class outTable {
 protected:
@@ -252,6 +255,39 @@ public:
 			}
 			csvFile << "\n";
 		}
+	}
+
+	void readCSV(string fileName, Table& t) {
+		ifstream csvFile(fileName);
+
+		if (!csvFile.is_open()) {
+			cout << endl << fileName;
+			cout << "Error opening CSV file." << endl;
+			return;
+		}
+
+		string line;
+		// Read data rows
+		while (getline(csvFile, line)) {
+			stringstream ss(line);
+			string single;
+			Article** cells = new Article * [100];
+			int noCells = 0;
+			while (getline(ss, single, ',')) {
+				cells[noCells++] = new Article(single);
+			}
+			Row row(cells, noCells);
+		
+
+			t.addRow(row); // Assuming you have a function to add a row to the table
+		
+			for (int i = 0; i < noCells; i++) {
+				delete cells[i];
+			}
+			delete[] cells;
+		}
+
+		csvFile.close();
 	}
 
 	~csvTable() {

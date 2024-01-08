@@ -34,6 +34,8 @@ int main(int argc, char* argv[]) {
 	}
 	
 
+
+	cout << endl << "/help for list of commands." << endl;
 	while (1) {
 		printLine();
 
