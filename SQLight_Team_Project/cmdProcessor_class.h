@@ -266,8 +266,33 @@ private:
 	}
 	
 	// Not implemented
-	void createIndex(smatch matches, TableBuffer& tableBuffer) {
+	void createIndex(smatch matches, TableBuffer& tb) {
 		cout << endl << "Not implemented." << endl;
+
+	
+		cout << endl << matches[1].str(); // if not exists
+		cout << endl << matches[2].str(); // index name
+		cout << endl << matches[3].str(); // table name
+		cout << endl << matches[4].str(); // column name
+	
+		if (matches[1].str() != "") {
+			// Check if it is already an index there with the same name
+			fstream file(matches[1].str() + ".idx");
+			if (file.is_open()) {
+				cout << endl << "There is already an index with the same name";
+				file.close();
+				return;
+			}
+		}
+
+		// We have to get the offset for every row.
+		loadTableIfNecessary(matches[3].str(), tb);
+		Table t = tb.getTable(tb.isTable(matches[3].str()));
+		int* offsets = nullptr;
+		int noOffsets = 0;
+		offsets = t.getOffsets(matches[4].str(), noOffsets); // daca nu mergre poate sa fie de la referinta la nooffsets
+		t.setIndex(matches[2].str(), offsets, noOffsets);
+
 		return;
 	}
 

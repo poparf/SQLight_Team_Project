@@ -11,9 +11,22 @@
 using namespace std;
 
 
+/*
+Mai trebuie facut create index si drop index
+- se salveaza offsetul pt fiecare valoare de la coloana ceruta ca si valoare int. pt fiecare row salvam un int
+- le salvam intr-un alt fisier binar si le citim atunci cand citim si tabelul in buffer
+- la select dam check daca coloana din select e si n index daca da ne folosim de index sa o afisam
+- la insert adaugam noul row la index
+
+Refactoring la procesorul de comenzi
+sa folosesc upcasting la comenzi pentru a le avea pe toate intr-un singur array
+
+
+*/
+
+
 int main(int argc, char* argv[]) {
 	CmdProcessor buffer;
-	properFormats formats;
 	TableBuffer tableBuffer;
 	properFormats pf;
 
@@ -21,7 +34,6 @@ int main(int argc, char* argv[]) {
 	while (--argc > 0) {
 		cout << endl << argv[argc] << endl;
 		buffer.insertCommands(string(argv[argc]), tableBuffer);
-		
 	}
 
 

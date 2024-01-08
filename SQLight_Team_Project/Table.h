@@ -1,6 +1,7 @@
 #pragma once
 #include "Column.h"
 #include "Row.h"
+#include "Index.h"
 
 using namespace std;
 
@@ -13,6 +14,8 @@ protected:
 
 	Row** rows = nullptr;
 	int noRows = 0;
+
+	Index index;
 public:
 	// Constructor with arguments
 	Table(string tableName, Column** columns, int noColumns) {
@@ -39,6 +42,13 @@ public:
 		return t;
 	}
 
+
+	void setIndex(string name,int* offsets, int noOffsets) {
+		this->index.setOffsets(offsets, noOffsets);
+		this->index.setName(name);
+		this->index.writeIndex();
+	}
+
 	// Returns the index of the column if exists else returns -1
 	int isColumn(string name) {
 		for (int i = 0; i < this->noColumns; i++) {
@@ -46,6 +56,101 @@ public:
 				return i;
 		}
 		return -1;
+	}
+
+	int* getOffsets(string columnSpecified, int& noOffsets) {
+		ifstream file(this->name + ".bin", ios::binary);
+
+		if (!file.is_open())
+			throw exception("File couldn't be opened.");
+
+		int* offsets = new int[9999];
+		int colIndex = this->isColumn(columnSpecified);
+
+		int noCols;
+		int noRows;
+		file.read((char*)&noCols, sizeof(int));
+		file.read((char*)&noRows, sizeof(int));
+
+		Row** rows = new Row * [noRows];
+		Column** cols = new Column * [noCols];
+
+		for (int i = 0; i < noCols; i++) {
+			int colNameSize;
+			file.read((char*)&colNameSize, sizeof(int));
+
+			char buffer[1000];
+			file.read(buffer, sizeof(char) * colNameSize);
+			string colName = string(buffer);
+
+			int colType;
+			file.read((char*)&colType, sizeof(int));
+
+			int size;
+			file.read((char*)&size, sizeof(int));
+
+			int colDefValueSize;
+			file.read((char*)&colDefValueSize, sizeof(int));
+
+			char buffer2[1000];
+			file.read(buffer2, sizeof(char) * colDefValueSize);
+			string defValue = string(buffer2);
+
+			cols[i] = new Column(colName, (columnTypes)colType, size, defValue);
+		}
+
+		
+		for (int i = 0; i < noRows; i++) {
+			int noCells;
+			file.read((char*)&noCells, sizeof(int));
+			Article** cells = new Article * [noCells];
+
+			for (int j = 0; j < noCells; j++) {
+				if (j == colIndex) {
+					offsets[noOffsets++] = file.tellg();
+					if (noOffsets == 9999) {
+						int* newOffsets = new int[noOffsets * 2];
+						for (int i = 0; i < noOffsets; i++)
+							newOffsets[i] = offsets[i];
+
+						delete[] offsets;
+						offsets = newOffsets;
+					}
+				}
+				
+				int dataSize;
+				file.read((char*)&dataSize, sizeof(int));
+
+				char buffer3[1000];
+				file.read(buffer3, sizeof(char) * dataSize);
+				string data = string(buffer3);
+
+				cells[j] = new Article(data);
+			}
+
+			rows[i] = new Row(cells, noCells);
+		}
+
+		for (int i = 0; i < noRows; i++) {
+			if (rows[i] != nullptr)
+				delete rows[i];
+		}
+		delete[] rows;
+
+		for (int i = 0; i < noCols; i++) {
+			if (cols[i] != nullptr)
+				delete cols[i];
+		}
+		delete[] cols;
+
+
+		int* newOffsets = new int[noOffsets];
+		for (int i = 0; i < noOffsets; i++)
+			newOffsets[i] = offsets[i];
+
+		delete[] offsets;
+		offsets = newOffsets;
+		return offsets;
 	}
 
 	void deleteFrom(string colName, string valSearched) {

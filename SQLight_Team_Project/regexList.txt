@@ -1,6 +1,6 @@
 10
 ^\s*CREATE\s+TABLE\s+([A-Za-z][A-Za-z0-9]+)\s*(IF\s+NOT\s+EXISTS)?\s+\(\s*((?:\(\s*[A-Za-z][A-Za-z0-9]+\s*,\s*[A-Za-z]+\s*,\s*[0-9]+\s*,\s*[A-Za-z0-9\"']+\s*\)\s*,?\s*)+?)\s*\)$
-^\s*CREATE\s+INDEX\s*(IF\s+NOT\s+EXISTS)?\s+([a-zA-Z0-9]+)\s+ON\s+([a-zA-Z0-9]+)\s+\((\s*[a-zA-Z0-9]+)\s*\)$
+^\s*CREATE\s+INDEX\s*(IF\s+NOT\s+EXISTS)?\s+([a-zA-Z0-9_]+)\s+ON\s+([a-zA-Z0-9]+)\s*\((\s*[a-zA-Z0-9]+)\s*\)$
 ^\s*DROP\s+TABLE\s+([a-zA-Z0-9]+)\s*$
 ^\s*DROP\s+INDEX\s+([a-zA-Z0-9]+)\s*$
 ^\s*DISPLAY\s+TABLE\s+([a-zA-Z0-9]*)\s*$
