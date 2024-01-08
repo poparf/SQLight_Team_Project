@@ -148,7 +148,6 @@ public:
 			if (comenzi.is_open()) {
 				while (getline(comenzi, comanda)) {
 					this->fullCmd = comanda;
-					cout << endl << fullCmd;
 					this->checkCmd(tableBuffer);
 				}
 				comenzi.close();
