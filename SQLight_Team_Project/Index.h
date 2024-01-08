@@ -28,7 +28,7 @@ public:
 		delete[] this->offsets;
 		this->offsets = newOff;
 	}
-
+	
 	void writeIndex() {
 		ofstream file(this->name + ".idx", ios::binary);
 		if (!file.is_open())
@@ -42,6 +42,10 @@ public:
 		}
 
 		file.close();
+	}
+
+	string getName() {
+		return this->name;
 	}
 
 	void setOffsets(int* offsets, int noOffsets) {

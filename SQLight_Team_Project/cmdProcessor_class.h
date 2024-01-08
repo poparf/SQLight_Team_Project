@@ -265,15 +265,12 @@ private:
 		ot.write(tableName + ".bin", t);
 	}
 	
-	// Not implemented
 	void createIndex(smatch matches, TableBuffer& tb) {
-		cout << endl << "Not implemented." << endl;
-
 	
-		cout << endl << matches[1].str(); // if not exists
-		cout << endl << matches[2].str(); // index name
-		cout << endl << matches[3].str(); // table name
-		cout << endl << matches[4].str(); // column name
+		//cout << endl << matches[1].str(); // if not exists
+		//cout << endl << matches[2].str(); // index name
+		//cout << endl << matches[3].str(); // table name
+		//cout << endl << matches[4].str(); // column name
 	
 		if (matches[1].str() != "") {
 			// Check if it is already an index there with the same name
@@ -288,11 +285,20 @@ private:
 		// We have to get the offset for every row.
 		loadTableIfNecessary(matches[3].str(), tb);
 		Table t = tb.getTable(tb.isTable(matches[3].str()));
+
 		int* offsets = nullptr;
 		int noOffsets = 0;
-		offsets = t.getOffsets(matches[4].str(), noOffsets); // daca nu mergre poate sa fie de la referinta la nooffsets
-		t.setIndex(matches[2].str(), offsets, noOffsets);
+		int colIndex = t.isColumn(matches[4].str());
+		if (colIndex == -1) {
+			throw exception("Column not found.");
+		}
+		Column col = t.getColumn(colIndex);
+		offsets = t.getOffsets(matches[4].str(), noOffsets);
+		col.setIndex(matches[2].str(), offsets, noOffsets);
 
+		t.setColumn(col, colIndex);
+		tb.replaceTable(t);
+		
 		return;
 	}
 
@@ -307,9 +313,26 @@ private:
 		tableBuffer.removeTable(index);
 	}
 
-	// Not implemented
-	void dropIndex(smatch matches, TableBuffer& tableBuffer) {
-		cout << endl << "Not implemented." << endl;
+	void dropIndex(smatch matches, TableBuffer& tb) {
+		// delete from files first
+		if (remove((matches[1].str() + ".idx").c_str()))
+			cout << endl << "There is no index with this name on the disk.";
+
+		int noTables = tb.getNoTables();
+		for (int i = 0; i < noTables; i++) {
+			Table t = tb.getTable(i);
+			int noCols = t.getNoColumns();
+			for (int j = 0; j < noCols; j++) {
+				Column col = t.getColumn(j);
+				Index colIndex = col.getIndex();
+				if (colIndex.getName() == matches[1].str()) {
+					col.setIndex("", nullptr, 0);
+					t.setColumn(col, j);
+					tb.replaceTable(t);
+					return;
+				}
+			}
+		}
 		return;
 	}
 
@@ -387,10 +410,10 @@ private:
 
 		Table t = tb.getTable(tb.isTable(tableName));
 		if (toLowerCase(matches[1].str()) == "all") {
-			
+			// all columns with no where
 			if (matches[7].str() == "") {
 				cout << t;
-			}
+			} // all columns with where
 			else {
 				Table temp = t.filterTableWithWhereClause(matches[7].str(), matches[8].str(), this->noGen); // rename this..
 				cout << temp;
@@ -399,6 +422,7 @@ private:
 			}
 		}
 		else {
+			//specific columns with no where
 			if (matches[7].str() == "") {
 				regex partitionRegex("[^ ,)(][a-zA-Z0-9\"'\\s*]*");
 				string paranteza = matches[1].str();
@@ -422,7 +446,7 @@ private:
 				generateExtensions(temp);
 			}
 			else {
-
+				// specific columns with where
 				// You have to print only specific columns
 				regex partitionRegex("[^ ,)(][a-zA-Z0-9\"'\\s*]*");
 				string paranteza = matches[1].str();

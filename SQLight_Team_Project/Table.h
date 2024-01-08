@@ -14,8 +14,6 @@ protected:
 
 	Row** rows = nullptr;
 	int noRows = 0;
-
-	Index index;
 public:
 	// Constructor with arguments
 	Table(string tableName, Column** columns, int noColumns) {
@@ -38,39 +36,28 @@ public:
 		this->name = t.name;
 		this->setRows(t.rows, t.noRows);
 		this->setColumns(t.columns, t.noColumns);
-
+	
 		return t;
 	}
 
-
-	void setIndex(string name,int* offsets, int noOffsets) {
-		this->index.setOffsets(offsets, noOffsets);
-		this->index.setName(name);
-		this->index.writeIndex();
+	void setColumn(Column col, int index) {
+		this->columns[index] = nullptr;
+		this->columns[index] = new Column(col);
 	}
-
-	// Returns the index of the column if exists else returns -1
-	int isColumn(string name) {
-		for (int i = 0; i < this->noColumns; i++) {
-			if ((*this->columns[i]).getName() == name)
-				return i;
-		}
-		return -1;
-	}
-
-	int* getOffsets(string columnSpecified, int& noOffsets) {
+	int* getOffsets(string colSpecified, int& noOffsets) {
 		ifstream file(this->name + ".bin", ios::binary);
 
 		if (!file.is_open())
 			throw exception("File couldn't be opened.");
 
 		int* offsets = new int[9999];
-		int colIndex = this->isColumn(columnSpecified);
 
 		int noCols;
 		int noRows;
 		file.read((char*)&noCols, sizeof(int));
 		file.read((char*)&noRows, sizeof(int));
+		
+		int colIndex = this->isColumn(colSpecified);
 
 		Row** rows = new Row * [noRows];
 		Column** cols = new Column * [noCols];
@@ -99,7 +86,7 @@ public:
 			cols[i] = new Column(colName, (columnTypes)colType, size, defValue);
 		}
 
-		
+
 		for (int i = 0; i < noRows; i++) {
 			int noCells;
 			file.read((char*)&noCells, sizeof(int));
@@ -117,7 +104,7 @@ public:
 						offsets = newOffsets;
 					}
 				}
-				
+
 				int dataSize;
 				file.read((char*)&dataSize, sizeof(int));
 
@@ -151,6 +138,23 @@ public:
 		delete[] offsets;
 		offsets = newOffsets;
 		return offsets;
+	}
+
+	Column getColumn(int index) {
+		if (index < 0 || index >= this->noColumns) {
+			throw exception("Bad index");
+		}
+		return (*this->columns[index]);
+	}
+
+
+	// Returns the index of the column if exists else returns -1
+	int isColumn(string name) {
+		for (int i = 0; i < this->noColumns; i++) {
+			if ((*this->columns[i]).getName() == name)
+				return i;
+		}
+		return -1;
 	}
 
 	void deleteFrom(string colName, string valSearched) {
@@ -378,6 +382,9 @@ public:
 			throw exception("Wrong column name in the where clause.");
 		}
 
+		Index index = this->columns[colIndexToBeMatched]->getIndex();
+		ifstream indexFile(index.getName() + ".idx", ios::binary);
+
 		Column** newCols = new Column * [noCols];
 		int actualSizeNewCols = 0;
 
@@ -481,7 +488,9 @@ public:
 	}
 
 	
-
+	int getNoColumns() {
+		return this->noColumns;
+	}
 
 
 
@@ -542,7 +551,6 @@ private:
 		this->columns = newCols;
 		this->noColumns = noColumns;
 	}
-
 
 	void setRows(Row** rows, int noRows) {
 		if (noRows == 0) {

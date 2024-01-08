@@ -1,4 +1,5 @@
 #pragma once
+#include "Index.h"
 using namespace std;
 
 enum columnTypes { INTEGER, FLOAT, TEXT };
@@ -9,6 +10,8 @@ private:
 	columnTypes type = columnTypes::TEXT;
 	int size = 0;
 	string def = "";
+
+	Index index;
 public:
 
 	Column(string name, columnTypes type, int size, string def) {
@@ -18,6 +21,15 @@ public:
 		this->setDef(def);
 	}
 
+	void setIndex(string name, int* offsets, int noOffsets) {
+		this->index.setOffsets(offsets, noOffsets);
+		this->index.setName(name);
+		this->index.writeIndex();
+	}
+
+	Index getIndex() {
+		return this->index;
+	}
 
 	void setDef(string input) {
 		this->def = input;

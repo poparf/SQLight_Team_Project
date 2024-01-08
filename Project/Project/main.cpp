@@ -22,6 +22,14 @@ Refactoring la procesorul de comenzi
 sa folosesc upcasting la comenzi pentru a le avea pe toate intr-un singur array
 
 
+
+create si drop functioneaza dar la cum functioneaza in prezent select ul si scrierea tabelelor
+daca vreau sa folosesc un index la select trebuie sa l am in tabel
+iar cand citesc un tabel dintr un fisier binar nu am si index ul scris tot acolo. am index ul in alt fisier
+iar ca sa l citesc nu stiu numele fisierului.
+
+Chiar puteam sa mai refac chestii si sa imbunatatesc dar nu am mai avut timp
+O sa incerc sa termin toate ideile in phase 3.
 */
 
 
@@ -38,12 +46,12 @@ int main(int argc, char* argv[]) {
 
 
 
-	try {
+	/*try {
 		buffer.insertCommands("comenzi.txt", tableBuffer);
 	}
 	catch (exception& e) {
 		cout << endl << e.what();
-	}
+	}*/
 	
 
 

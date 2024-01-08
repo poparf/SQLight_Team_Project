@@ -6,6 +6,9 @@ protected:
 	Table** tables = nullptr;
 	int noTables = 0;
 public:
+	int getNoTables() {
+		return this->noTables;
+	}
 
 	TableBuffer() {}
 
