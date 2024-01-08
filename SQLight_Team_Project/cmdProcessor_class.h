@@ -412,6 +412,7 @@ private:
 			// all columns with no where
 			if (matches[7].str() == "") {
 				cout << t;
+				generateExtensions(t);
 			} // all columns with where
 			else {
 				Table temp = t.filterTableWithWhereClause(matches[7].str(), matches[8].str(), this->noGen); // rename this..

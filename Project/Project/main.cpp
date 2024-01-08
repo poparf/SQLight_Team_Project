@@ -56,6 +56,8 @@ int main(int argc, char* argv[]) {
 
 
 	cout << endl << "/help for list of commands." << endl;
+	cout << "You can also insert a list of commands by opening the program in the console and specifying a text file with commands separated by new lines." << endl;
+	cout << "Also you got provided with comenzi.txt and comenzi2.txt to test the program with.";
 	while (1) {
 		printLine();
 

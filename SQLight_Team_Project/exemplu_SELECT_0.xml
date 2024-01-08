@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Table name="exemplu_SELECT_0">
+	<Columns>
+		<Column name="ex1" />
+	</Columns>
+	<Rows>
+		<Row>
+			<Cell type="Number">3</Cell>
+		</Row>
+	</Rows>
+</Table>
