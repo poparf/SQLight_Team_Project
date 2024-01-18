@@ -1,5 +1,4 @@
 #pragma once
-
 using namespace std;
 #define NO_SECONDARY_COMMANDS 7
 
@@ -27,3 +26,17 @@ int checkSecondaryCommand(string fullCmd) {
 	return -1;
 }
 
+string getCurrentDate() {
+	// Get the current time
+	time_t currentTime = time(nullptr);
+
+	// Convert the current time to a tm structure
+	tm timeInfo = {};
+	localtime_s(&timeInfo, &currentTime);
+
+	// Format the date and time as "dd_mm_yyyy_hh_mm_ss"
+	char date[20];
+	strftime(date, sizeof(date), "%d_%m_%Y_%H_%M_%S", &timeInfo);
+
+	return string(date);
+}

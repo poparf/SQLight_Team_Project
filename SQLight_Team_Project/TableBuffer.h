@@ -5,12 +5,22 @@ class TableBuffer {
 protected:
 	Table** tables = nullptr;
 	int noTables = 0;
+
+	static TableBuffer* instance;
+	TableBuffer() {}
 public:
+
+	static TableBuffer* getInstance() {
+		if (instance == nullptr)
+			instance = new TableBuffer();
+		
+		return instance;
+	}
+
+
 	int getNoTables() {
 		return this->noTables;
 	}
-
-	TableBuffer() {}
 
 	void addTable(Table t) {
 
@@ -114,3 +124,5 @@ void operator<<(ostream& out, TableBuffer& tb) {
 	}
 	out << endl << "~~~~~~~~~~~~~~~" << endl;
 }
+
+TableBuffer* TableBuffer::instance = nullptr;

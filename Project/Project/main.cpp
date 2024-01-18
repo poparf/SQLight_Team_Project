@@ -35,13 +35,13 @@ O sa incerc sa termin toate ideile in phase 3.
 
 int main(int argc, char* argv[]) {
 	CmdProcessor buffer;
-	TableBuffer tableBuffer;
+	TableBuffer* tableBuffer = TableBuffer::getInstance();
 	properFormats pf;
 
 	// Loading files using text files from the cmdl
 	while (--argc > 0) {
 		cout << endl << argv[argc] << endl;
-		buffer.insertCommands(string(argv[argc]), tableBuffer);
+		buffer.insertCommands(string(argv[argc]), *tableBuffer);
 	}
 
 
@@ -110,7 +110,7 @@ int main(int argc, char* argv[]) {
 					cout << buffer.deactivateCSV();
 					break;
 				default:
-					if (!buffer.checkCmd(tableBuffer)) {
+					if (!buffer.checkCmd(*tableBuffer)) {
 						cout << endl << "Command not recognized: " << buffer.getFullCmd();
 					}
 					

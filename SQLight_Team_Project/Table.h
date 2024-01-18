@@ -2,6 +2,8 @@
 #include "Column.h"
 #include "Row.h"
 #include "Index.h"
+#include <ctime>
+#include <iomanip>
 
 using namespace std;
 
@@ -376,7 +378,7 @@ public:
 		delete[] this->rows;
 	}
 	//nume [prea lung
-	Table filterTableWithWhereClauseAndSpecificColumns(string* colNamesToBePrinted, int noCols, string whereColumn, string valueToMatch, int noGen) {
+	Table filterTableWithWhereClauseAndSpecificColumns(string* colNamesToBePrinted, int noCols, string whereColumn, string valueToMatch) {
 		int colIndexToBeMatched = isColumn(whereColumn);
 		if (colIndexToBeMatched == -1) {
 			throw exception("Wrong column name in the where clause.");
@@ -402,7 +404,8 @@ public:
 			}
 		}
 
-		Table filteredTable(name + "_SELECT_" + to_string(noGen), newCols, actualSizeNewCols);
+
+		Table filteredTable(name + "_SELECT_" + getCurrentDate(), newCols, actualSizeNewCols);
 
 		for (int i = 0; i < noRows; i++) {
 			Article** cells = rows[i]->getCells();
@@ -429,13 +432,13 @@ public:
 	}
 
 
-	Table filterTableWithWhereClause(string colName, string value, int noGen) {
+	Table filterTableWithWhereClause(string colName, string value) {
 		int colIndex = isColumn(colName);
 		if (colIndex == -1) {
 			throw exception("There is no column with this name.");
 		}
 
-		Table filteredTable(this->name + "_SELECT_" + to_string(noGen), this->columns, this->noColumns); // Create a new filtered table
+		Table filteredTable(this->name + "_SELECT_" + getCurrentDate(), this->columns, this->noColumns); // Create a new filtered table
 	
 
 		for (int i = 0; i < noRows; i++) {
@@ -454,7 +457,7 @@ public:
 		return filteredTable;
 	}
 
-	Table filterTableSpecificColumns(string* colNamesToBePrinted, int noCols, int noGen) {
+	Table filterTableSpecificColumns(string* colNamesToBePrinted, int noCols) {
 		//Table filteredTable(this->name + "_filtered", noCols, 0); // Create a new filtered table
 		Column** newCols = new Column * [noCols];
 		int actualSizeNewCols = 0;
@@ -471,7 +474,7 @@ public:
 				cout << endl << "Column " << colNamesToBePrinted[i] << " does not exist." << endl;
 			}
 		}
-		Table filteredTable(this->name + "_SELECT_" + to_string(noGen), columns, actualSizeNewCols);
+		Table filteredTable(this->name + "_SELECT_" + getCurrentDate(), columns, actualSizeNewCols);
 		for (int i = 0; i < noRows; i++) {
 			Article** cells = this->rows[i]->getCells();
 			int noCells = this->rows[i]->getNoCells();
@@ -491,9 +494,6 @@ public:
 	int getNoColumns() {
 		return this->noColumns;
 	}
-
-
-
 
 
 	friend void operator<<(ostream& out, Table& table);
