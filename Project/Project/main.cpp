@@ -39,9 +39,11 @@ int main(int argc, char* argv[]) {
 	InsertRow insertRow;
 	Import importCmd;
 	SelectValues selectValues;
+	DisplayTable displayTable;
 	UpdateTable updateTable;
 	DropTable dropTable;
 	DropIndex dropIndex;
+	DeleteFrom deleteFrom;
 
 	PrimaryCmd** primaryCmds = new PrimaryCmd*[PrimaryCmd::counter];
 	primaryCmds[0] = &createTable;
@@ -52,6 +54,8 @@ int main(int argc, char* argv[]) {
 	primaryCmds[5] = &updateTable;
 	primaryCmds[6] = &dropTable;
 	primaryCmds[7] = &dropIndex;
+	primaryCmds[8] = &deleteFrom;
+	primaryCmds[9] = &displayTable;
 	PrimaryCmd::counter--;
 
 	QuitCmd quit;

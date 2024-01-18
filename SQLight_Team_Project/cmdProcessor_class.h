@@ -241,8 +241,8 @@ public:
 class CreateTable : public CreateOperation {
 public:
 	CreateTable() {
-		this->cmdRgx.assign("^\s*CREATE\s+TABLE\s+([A-Za-z][A-Za-z0-9]+)\s*(IF\s+NOT\s+EXISTS)?\s+\(\s*((?:\(\s*[A-Za-z][A-Za-z0-9]+\s*,\s*[A-Za-z]+\s*,\s*[0-9]+\s*,\s*[A-Za-z0-9\"']+\s*\)\s*,?\s*)+?)\s*\)$", regex::icase);
-		this->partialRgx.assign("^\s*CREATE\s+TABLE\s*", regex::icase);
+		this->cmdRgx.assign("^\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9]+)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]+\\s*,\\s*[A-Za-z]+\\s*,\\s*[0-9]+\\s*,\\s*[A-Za-z0-9\"]+\\s*\\)\\s*,?\\s*)+?)\\s*\\)$", regex::icase);
+		this->partialRgx.assign("^\\s*CREATE\\s+TABLE\\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -273,7 +273,6 @@ public:
 		return 1;
 	}
 
-private:
 	void process() {
 		string beforePartition = matches[3].str();
 
@@ -335,9 +334,8 @@ private:
 		Table t(matches[1].str(), cols, noCols);
 		this->write(t);
 	}
-	
+private:
 	void write() {  };
-
 	void write(Table t) {
 		(*tb).addTable(t);
 		outTable ot;
@@ -349,8 +347,8 @@ class CreateIndex : public CreateOperation {
 public:
 
 	CreateIndex() {
-		this->cmdRgx.assign("^\s*CREATE\s+INDEX\s*(IF\s+NOT\s+EXISTS)?\s+([a-zA-Z0-9_]+)\s+ON\s+([a-zA-Z0-9]+)\s*\((\s*[a-zA-Z0-9]+)\s*\)$", regex::icase);
-		this->partialRgx.assign("^\s*CREATE\s+INDEX\s*", regex::icase);
+		this->cmdRgx.assign("^\s*CREATE\\s+INDEX\\s*(IF\\s+NOT\\s+EXISTS)?\\s+([a-zA-Z0-9_]+)\\s+ON\\s+([a-zA-Z0-9]+)\\s*\\((\\s*[a-zA-Z0-9]+)\\s*\\)$", regex::icase);
+		this->partialRgx.assign("^\\s*CREATE\\s+INDEX\\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -379,7 +377,6 @@ public:
 		return 1;
 	}
 
-private:
 	void process() {
 		this->loadTableIfNecessary(matches[3].str());
 		Table t = (*tb).getTable((*tb).isTable(matches[3].str()));
@@ -491,7 +488,7 @@ private:
 		t.setColumn(col, colIndex);
 		(*tb).replaceTable(t);
 	}
-
+	private:
 	// TODO
 	/*
 	Indexes are not loaded into the table from the files yet
@@ -506,8 +503,8 @@ class InsertRow : public CreateOperation {
 public:
 
 	InsertRow() {
-		this->cmdRgx.assign("^\s*INSERT\s+INTO\s+([a-zA-Z0-9]+)\s+VALUES\s*\(((\s*[a-zA-Z0-9\"']+\s*,?\s*)+)\)\s*$", regex::icase);
-		this->partialRgx.assign("^\s*INSERT\s+INTO\s*", regex::icase);
+		this->cmdRgx.assign("^\\s*INSERT\\s+INTO\\s+([a-zA-Z0-9]+)\\s+VALUES\\s*\\(((\\s*[a-zA-Z0-9\"']+\\s*,?\\s*)+)\\)\\s*$", regex::icase);
+		this->partialRgx.assign("^\\s*INSERT\\s+INTO\\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -522,8 +519,6 @@ public:
 		return 1;
 	}
 
-
-private:
 	void process() {
 		//	// matches[1] =  table name
 		//	// matches[2] = ce e in paranteza
@@ -558,7 +553,7 @@ private:
 		
 		this->write(row, t);
 	}
-
+private:
 	void write() {}; // how do i fix this?
 	void write(Row row, Table t) {
 		outTable ot;
@@ -573,8 +568,8 @@ class Import : public InsertRow {
 public:
 
 	Import() {
-		this->cmdRgx.assign("^\s*IMPORT\s+([a-zA-Z0-9]+)\s+([a-zA-Z0-9.]+)$", regex::icase);
-		this->partialRgx.assign("^\s*IMPORT\s*", regex::icase);
+		this->cmdRgx.assign("^\\s*IMPORT\\s+([a-zA-Z0-9]+)\\s+([a-zA-Z0-9.]+)$", regex::icase);
+		this->partialRgx.assign("^\\s*IMPORT\\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -592,7 +587,6 @@ public:
 
 		return 1;
 	}
-private:
 
 	void process() {
 		loadTableIfNecessary(matches[1].str());
@@ -600,6 +594,7 @@ private:
 		(*tb).replaceTable(t);
 		this->write(t);
 	}
+private:
 
 	void write() {};
 	void write(Table& t) {
@@ -612,17 +607,17 @@ class ReadOperation : public PrimaryCmd {
 protected:
 	regex partialRgx;
 public:
-	virtual void display(Table& temp) = 0;
+	virtual void display() = 0;
 
 	// CSV/XML files
-	virtual void raport(Table& temp) = 0;
+	virtual void raport() = 0;
 };
 
 class SelectValues : public ReadOperation {
 public:
 	SelectValues() {
-		this->cmdRgx.assign("^\s*SELECT\s*((\((\s*[a-zA-Z0-9]+\s*,?\s*)+\))+|(ALL))\s*FROM\s+([a-zA-Z0-9]+)+\s*(WHERE\s+([a-zA-Z0-9]+)\s*=\s*([a-zA-Z0-9]+))?$", regex::icase);
-		this->partialRgx.assign("^\s*SELECT\s*", regex::icase);
+		this->cmdRgx.assign("^\\s*SELECT\\s*((\\((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+\\))+|(ALL))\\s*FROM\\s+([a-zA-Z0-9]+)+\\s*(WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+))?$", regex::icase);
+		this->partialRgx.assign("^\\s*SELECT\\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -636,7 +631,6 @@ public:
 		}
 		return 1;
 	}
-private:
 	void process() {
 		//cout << matches[1].str();		  // ce e in paranteza sau all
 		//cout << endl << matches[5].str(); // table name
@@ -710,14 +704,59 @@ private:
 		}
 	}
 
+private:
+	void display() {};
 	void display(Table& temp) {
 		cout << temp;
 	}
-
+	void raport() {};
 	void raport(Table& temp) {
 		generateExtensions(temp);
 	}
 
+};
+
+
+class DisplayTable : public ReadOperation {
+public:
+	
+	DisplayTable() {
+		this->cmdRgx.assign("^\\s*DISPLAY\\s+TABLE\\s+([a-zA-Z0-9]*)\\s*$", regex::icase);
+		this->partialRgx.assign("^\\s*DISPLAY\\s+TABLE\\s*", regex::icase);
+		this->counter++;
+	}
+
+	bool check() {
+		if (!regex_search(this->input, this->partialRgx))
+			return 0;
+
+		if (!regex_search(this->input, this->matches, this->cmdRgx)) {
+			cout << endl << pf.guideline["DISPLAY TABLE"];
+			return 0;
+		}
+
+		return 1;
+	}
+
+	void process() {
+		// Checking the buffer
+		loadTableIfNecessary(matches[1].str());
+
+		Table t = (*tb).getTable((*tb).isTable(matches[1].str()));
+		cout << t;
+
+		this->generateExtensions(t);
+	}
+private:
+	void display() {
+		Table t = (*tb).getTable((*tb).isTable(matches[1].str()));
+		cout << t;
+	}
+
+	void raport() {
+		Table t = (*tb).getTable((*tb).isTable(matches[1].str()));
+		this->generateExtensions(t);
+	}
 };
 
 class UpdateOperation : public PrimaryCmd {
@@ -730,8 +769,8 @@ public:
 class UpdateTable : public UpdateOperation {
 public:
 	UpdateTable() {
-		this->cmdRgx.assign("^\s*UPDATE\s+([a-zA-Z0-9]+)\s+SET\s+([a-zA-Z0-9]+)\s*=\s*([a-zA-Z0-9\"']+)\s+WHERE\s+([a-zA-Z0-9]+)\s*=\s*([a-zA-Z0-9\"']+)\s*$", regex::icase);
-		this->partialRgx.assign("^\s*UPDATE\s*", regex::icase);
+		this->cmdRgx.assign("^\\s*UPDATE\\s+([a-zA-Z0-9]+)\\s+SET\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9\"']+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9\']+)\\s*$", regex::icase);
+		this->partialRgx.assign("^\\s*UPDATE\\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -746,7 +785,7 @@ public:
 
 		return 1;
 	}
-private:
+
 	void process() {
 		//cout << endl << matches[1].str(); // table name
 		//cout << endl << matches[2].str(); // SET Column
@@ -776,14 +815,13 @@ private:
 
 		t.update(setColumnName, setValueName, whereColumnName, whereValueName, whereColumnIndex, setColIndex);
 		(*tb).replaceTable(t);
-
-
-		this->write(t);
+	
+		this->write();
 	}
-
-	void write() {};
-	void write(Table& t) {
+private:
+	void write() {
 		outTable ot;
+		Table t = (*tb).getTable((*tb).isTable(matches[1].str()));
 		ot.write(t.getName() + ".bin", t);
 		this->generateExtensions(t);
 	}
@@ -797,8 +835,8 @@ public:
 class DropTable : public DeleteOperation {
 public:
 	DropTable() {
-		this->cmdRgx.assign("^\s*DROP\s+TABLE\s+([a-zA-Z0-9]+)\s*$", regex::icase);
-		this->partialRgx.assign("^\s*DROP\s+TABLE\s*", regex::icase);
+		this->cmdRgx.assign("^\\s*DROP\\s+TABLE\\s+([a-zA-Z0-9]+)\\s*$", regex::icase);
+		this->partialRgx.assign("^\\s*DROP\\s+TABLE\\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -812,7 +850,7 @@ public:
 		}
 		return 1;
 	}
-private:
+
 	void process() {
 		int index = (*tb).isTable(matches[1].str());
 		if (index == -1)
@@ -821,7 +859,7 @@ private:
 		(*tb).removeTable(index);
 		this->del();
 	}
-
+private:
 	void del() {
 		if (remove((matches[1].str() + ".bin").c_str()))
 			cout << endl << "There is no file with this name on the disk.";
@@ -831,8 +869,8 @@ private:
 class DropIndex : public DeleteOperation {
 public:
 	DropIndex() {
-		this->cmdRgx.assign("^\s*DROP\s+INDEX\s+([a-zA-Z0-9]+)\s*$", regex::icase);
-		this->partialRgx.assign("^\s*DROP\s+INDEX\s*", regex::icase);
+		this->cmdRgx.assign("^\\s*DROP\\s+INDEX\\s+([a-zA-Z0-9]+)\\s*$", regex::icase);
+		this->partialRgx.assign("^\\s*DROP\\s+INDEX\\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -846,7 +884,6 @@ public:
 		}
 		return 1;
 	}
-private:
 	void process() {
 
 		// TODO: 
@@ -870,9 +907,49 @@ private:
 		}
 		return;
 	}
-
+private:
 	void del() {
 		if (remove((matches[1].str() + ".idx").c_str()))
 			cout << endl << "There is no index with this name on the disk.";
+	}
+};
+
+class DeleteFrom : public DeleteOperation {
+public:
+
+	DeleteFrom() {
+		this->cmdRgx.assign("^\\s*DELETE\\s+FROM\\s+([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s+=\\s+([a-zA-Z0-9]+)\\s*$", regex::icase);
+		this->partialRgx.assign("^\\s*DELETE\\s+FROM\\s*", regex::icase);
+		this->counter++;
+	}
+
+	bool check() {
+		if (!regex_search(this->input, this->partialRgx))
+			return 0;
+
+		if (!regex_search(this->input, this->matches, this->cmdRgx)) {
+			cout << endl << pf.guideline["DELETE FROM"];
+			return 0;
+		}
+		return 1;
+	}
+	void process() {
+		string tableName = matches[1].str();
+		// Checking the buffer
+		loadTableIfNecessary(tableName);
+
+		Table t = (*tb).getTable((*tb).isTable(tableName));
+		t.deleteFrom(matches[2].str(), matches[3].str());
+		(*tb).replaceTable(t);
+
+		outTable ot;
+		ot.write(matches[1].str() + ".bin", t);
+	}
+private:
+	void del() {
+		string tableName = matches[1].str();
+		Table t = (*tb).getTable((*tb).isTable(tableName));
+		t.deleteFrom(matches[2].str(), matches[3].str());
+		(*tb).replaceTable(t);
 	}
 };
