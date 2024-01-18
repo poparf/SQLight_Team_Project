@@ -25,6 +25,7 @@ string getCurrentDate() {
 	return string(date);
 }
 
+// doesn t work idk why
 template<class T>
 void checkCommands(T** t) {
 	for (int i = 0; i < T::counter; i++) {

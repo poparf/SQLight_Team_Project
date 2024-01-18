@@ -25,7 +25,7 @@ iar cand citesc un tabel dintr un fisier binar nu am si index ul scris tot acolo
 iar ca sa l citesc nu stiu numele fisierului.
 
 */
-
+string Statement::input;
 
 int main(int argc, char* argv[]) {
 	cout << endl << "/help for list of commands." << endl;
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 	primaryCmds[5] = &updateTable;
 	primaryCmds[6] = &dropTable;
 	primaryCmds[7] = &dropIndex;
-
+	PrimaryCmd::counter--;
 
 	QuitCmd quit;
 	ClearConsoleCmd clear;
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
 	secondaryCmds[2] = &help;
 	secondaryCmds[3] = &csv;
 	secondaryCmds[4] = &xml;
-
+	SecondaryCmd::counter--;
 
 	while (--argc > 0) {
 		string fileName = string(argv[argc]);
@@ -82,11 +82,25 @@ int main(int argc, char* argv[]) {
 
 						if (Statement::getInput()[0] == '/')
 						{
-							checkCommands(secondaryCmds);
+							for (int i = 0; i < SecondaryCmd::counter; i++) {
+								if (secondaryCmds[i] != nullptr) {
+									if (secondaryCmds[i]->check()) {
+										secondaryCmds[i]->process();
+										continue;
+									}
+								}
+							}
 						}
 						else
 						{
-							checkCommands(primaryCmds);
+							for (int i = 0; i < PrimaryCmd::counter; i++) {
+								if (primaryCmds[i] != nullptr) {
+									if (primaryCmds[i]->check()) {
+										primaryCmds[i]->process();
+										continue;
+									}
+								}
+							}
 						}
 					}
 					catch (const exception& e) {
@@ -113,11 +127,25 @@ int main(int argc, char* argv[]) {
 
 			if (Statement::getInput()[0] == '/')
 			{
-				checkCommands(secondaryCmds);
+				for (int i = 0; i < SecondaryCmd::counter; i++) {
+					if (secondaryCmds[i] != nullptr) {
+						if (secondaryCmds[i]->check()) {
+							secondaryCmds[i]->process();
+							continue;
+						}
+					}
+				}
 			}
 			else
 			{
-				checkCommands(primaryCmds);
+				for (int i = 0; i < PrimaryCmd::counter; i++) {
+					if (primaryCmds[i] != nullptr) {
+						if (primaryCmds[i]->check()) {
+							primaryCmds[i]->process();
+							continue;
+						}
+					}
+				}
 			}
 		}
 		catch (const exception& e) {

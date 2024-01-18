@@ -66,8 +66,6 @@ public:
 	virtual bool check() {
 		if (this->cmd == this->input)
 			return 1;
-		else
-			throw exception("Wrong input. Try again.");
 		return 0; // just in case
 	};
 
@@ -243,8 +241,8 @@ public:
 class CreateTable : public CreateOperation {
 public:
 	CreateTable() {
-		this->cmdRgx.assign("^\s*CREATE\s+TABLE\s+([A-Za-z][A-Za-z0-9]+)\s*(IF\s+NOT\s+EXISTS)?\s+\(\s*((?:\(\s*[A-Za-z][A-Za-z0-9]+\s*,\s*[A-Za-z]+\s*,\s*[0-9]+\s*,\s*[A-Za-z0-9\"']+\s*\)\s*,?\s*)+?)\s*\)$");
-		this->partialRgx.assign("^\s*CREATE\s+TABLE\s*");
+		this->cmdRgx.assign("^\s*CREATE\s+TABLE\s+([A-Za-z][A-Za-z0-9]+)\s*(IF\s+NOT\s+EXISTS)?\s+\(\s*((?:\(\s*[A-Za-z][A-Za-z0-9]+\s*,\s*[A-Za-z]+\s*,\s*[0-9]+\s*,\s*[A-Za-z0-9\"']+\s*\)\s*,?\s*)+?)\s*\)$", regex::icase);
+		this->partialRgx.assign("^\s*CREATE\s+TABLE\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -254,6 +252,7 @@ public:
 
 		if (!regex_search(this->input, this->matches, this->cmdRgx)) {
 			cout << endl << pf.guideline["CREATE TABLE"];
+			return 0;
 		}
 
 		string tableName = matches[1].str();
@@ -350,8 +349,8 @@ class CreateIndex : public CreateOperation {
 public:
 
 	CreateIndex() {
-		this->cmdRgx.assign("^\s*CREATE\s+INDEX\s*(IF\s+NOT\s+EXISTS)?\s+([a-zA-Z0-9_]+)\s+ON\s+([a-zA-Z0-9]+)\s*\((\s*[a-zA-Z0-9]+)\s*\)$");
-		this->partialRgx.assign("^\s*CREATE\s+INDEX\s*");
+		this->cmdRgx.assign("^\s*CREATE\s+INDEX\s*(IF\s+NOT\s+EXISTS)?\s+([a-zA-Z0-9_]+)\s+ON\s+([a-zA-Z0-9]+)\s*\((\s*[a-zA-Z0-9]+)\s*\)$", regex::icase);
+		this->partialRgx.assign("^\s*CREATE\s+INDEX\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -507,8 +506,8 @@ class InsertRow : public CreateOperation {
 public:
 
 	InsertRow() {
-		this->cmdRgx.assign("^\s*INSERT\s+INTO\s+([a-zA-Z0-9]+)\s+VALUES\s*\(((\s*[a-zA-Z0-9\"']+\s*,?\s*)+)\)\s*$");
-		this->partialRgx.assign("^\s*INSERT\s+INTO\s*");
+		this->cmdRgx.assign("^\s*INSERT\s+INTO\s+([a-zA-Z0-9]+)\s+VALUES\s*\(((\s*[a-zA-Z0-9\"']+\s*,?\s*)+)\)\s*$", regex::icase);
+		this->partialRgx.assign("^\s*INSERT\s+INTO\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -574,8 +573,8 @@ class Import : public InsertRow {
 public:
 
 	Import() {
-		this->cmdRgx.assign("^\s*IMPORT\s+([a-zA-Z0-9]+)\s+([a-zA-Z0-9.]+)$");
-		this->partialRgx.assign("^\s*IMPORT\s*");
+		this->cmdRgx.assign("^\s*IMPORT\s+([a-zA-Z0-9]+)\s+([a-zA-Z0-9.]+)$", regex::icase);
+		this->partialRgx.assign("^\s*IMPORT\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -622,8 +621,8 @@ public:
 class SelectValues : public ReadOperation {
 public:
 	SelectValues() {
-		this->cmdRgx.assign("^\s*SELECT\s*((\((\s*[a-zA-Z0-9]+\s*,?\s*)+\))+|(ALL))\s*FROM\s+([a-zA-Z0-9]+)+\s*(WHERE\s+([a-zA-Z0-9]+)\s*=\s*([a-zA-Z0-9]+))?$");
-		this->partialRgx.assign("^\s*SELECT\s*");
+		this->cmdRgx.assign("^\s*SELECT\s*((\((\s*[a-zA-Z0-9]+\s*,?\s*)+\))+|(ALL))\s*FROM\s+([a-zA-Z0-9]+)+\s*(WHERE\s+([a-zA-Z0-9]+)\s*=\s*([a-zA-Z0-9]+))?$", regex::icase);
+		this->partialRgx.assign("^\s*SELECT\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -731,8 +730,8 @@ public:
 class UpdateTable : public UpdateOperation {
 public:
 	UpdateTable() {
-		this->cmdRgx.assign("^\s*UPDATE\s+([a-zA-Z0-9]+)\s+SET\s+([a-zA-Z0-9]+)\s*=\s*([a-zA-Z0-9\"']+)\s+WHERE\s+([a-zA-Z0-9]+)\s*=\s*([a-zA-Z0-9\"']+)\s*$");
-		this->partialRgx.assign("^\s*UPDATE\s*");
+		this->cmdRgx.assign("^\s*UPDATE\s+([a-zA-Z0-9]+)\s+SET\s+([a-zA-Z0-9]+)\s*=\s*([a-zA-Z0-9\"']+)\s+WHERE\s+([a-zA-Z0-9]+)\s*=\s*([a-zA-Z0-9\"']+)\s*$", regex::icase);
+		this->partialRgx.assign("^\s*UPDATE\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -798,8 +797,8 @@ public:
 class DropTable : public DeleteOperation {
 public:
 	DropTable() {
-		this->cmdRgx.assign("^\s*DROP\s+TABLE\s+([a-zA-Z0-9]+)\s*$");
-		this->partialRgx.assign("^\s*DROP\s+TABLE\s*");
+		this->cmdRgx.assign("^\s*DROP\s+TABLE\s+([a-zA-Z0-9]+)\s*$", regex::icase);
+		this->partialRgx.assign("^\s*DROP\s+TABLE\s*", regex::icase);
 		this->counter++;
 	}
 
@@ -832,8 +831,8 @@ private:
 class DropIndex : public DeleteOperation {
 public:
 	DropIndex() {
-		this->cmdRgx.assign("^\s*DROP\s+INDEX\s+([a-zA-Z0-9]+)\s*$");
-		this->partialRgx.assign("^\s*DROP\s+INDEX\s*");
+		this->cmdRgx.assign("^\s*DROP\s+INDEX\s+([a-zA-Z0-9]+)\s*$", regex::icase);
+		this->partialRgx.assign("^\s*DROP\s+INDEX\s*", regex::icase);
 		this->counter++;
 	}
 
