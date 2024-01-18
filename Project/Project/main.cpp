@@ -18,108 +18,111 @@ Mai trebuie facut create index si drop index
 - la select dam check daca coloana din select e si n index daca da ne folosim de index sa o afisam
 - la insert adaugam noul row la index
 
-Refactoring la procesorul de comenzi
-sa folosesc upcasting la comenzi pentru a le avea pe toate intr-un singur array
-
-
 
 create si drop functioneaza dar la cum functioneaza in prezent select ul si scrierea tabelelor
 daca vreau sa folosesc un index la select trebuie sa l am in tabel
 iar cand citesc un tabel dintr un fisier binar nu am si index ul scris tot acolo. am index ul in alt fisier
 iar ca sa l citesc nu stiu numele fisierului.
 
-Chiar puteam sa mai refac chestii si sa imbunatatesc dar nu am mai avut timp
-O sa incerc sa termin toate ideile in phase 3.
 */
 
 
 int main(int argc, char* argv[]) {
-	CmdProcessor buffer;
-	TableBuffer* tableBuffer = TableBuffer::getInstance();
-	properFormats pf;
-
-	// Loading files using text files from the cmdl
-	while (--argc > 0) {
-		cout << endl << argv[argc] << endl;
-		buffer.insertCommands(string(argv[argc]), *tableBuffer);
-	}
-
-
-
-	/*try {
-		buffer.insertCommands("comenzi.txt", tableBuffer);
-	}
-	catch (exception& e) {
-		cout << endl << e.what();
-	}*/
-	
-
-
 	cout << endl << "/help for list of commands." << endl;
 	cout << "You can also insert a list of commands by opening the program in the console and specifying a text file with commands separated by new lines." << endl;
 	cout << "Also you got provided with comenzi.txt and comenzi2.txt to test the program with.";
+
+	TableBuffer* tableBuffer = TableBuffer::getInstance();
+
+	CreateTable createTable;
+	CreateIndex createIndex;
+	InsertRow insertRow;
+	Import importCmd;
+	SelectValues selectValues;
+	UpdateTable updateTable;
+	DropTable dropTable;
+	DropIndex dropIndex;
+
+	PrimaryCmd** primaryCmds = new PrimaryCmd*[PrimaryCmd::counter];
+	primaryCmds[0] = &createTable;
+	primaryCmds[1] = &createIndex;
+	primaryCmds[2] = &insertRow;
+	primaryCmds[3] = &importCmd;
+	primaryCmds[4] = &selectValues;
+	primaryCmds[5] = &updateTable;
+	primaryCmds[6] = &dropTable;
+	primaryCmds[7] = &dropIndex;
+
+
+	QuitCmd quit;
+	ClearConsoleCmd clear;
+	HelpCmd help;
+	CSV csv;
+	XML xml;
+
+	SecondaryCmd** secondaryCmds = new SecondaryCmd * [SecondaryCmd::counter];
+	secondaryCmds[0] = &quit;
+	secondaryCmds[1] = &clear;
+	secondaryCmds[2] = &help;
+	secondaryCmds[3] = &csv;
+	secondaryCmds[4] = &xml;
+
+
+	while (--argc > 0) {
+		string fileName = string(argv[argc]);
+		ifstream comenzi(fileName);
+		string comanda;
+		try {
+			if (comenzi.is_open()) {
+
+				while (getline(comenzi, comanda)) {
+
+					try {
+						Statement::setInput(comanda);
+
+						if (Statement::getInput()[0] == '/')
+						{
+							checkCommands(secondaryCmds);
+						}
+						else
+						{
+							checkCommands(primaryCmds);
+						}
+					}
+					catch (const exception& e) {
+						cout << e.what() << endl;
+						continue;
+					};
+
+				}
+
+				comenzi.close();
+			}
+		}
+		catch (exception& e) {
+			cout << endl << e.what();
+		}
+	}
+
+
 	while (1) {
-		printLine();
+		cout << endl << "SQLite>";
 
 		try {
-			buffer.setFullCmd();
-		}
-		catch (const exception& e) {
-			cout << e.what() << endl;
-			continue; // Reset the loop
-		}
-		
+			Statement::setInput();
 
-		try {
-			
-			switch (checkSecondaryCommand(buffer.getFullCmd()))
+			if (Statement::getInput()[0] == '/')
 			{
-				case 1:
-					exit(EXIT_SUCCESS);
-					break;
-				case 2:
-					system("cls");
-					break;
-				case 3:
-					cout << endl << "Available commands at this point:";
-					cout << "\n" << "/activate xml";
-					cout << "\n" << "/activate csv";
-					cout << "\n" << "/deactivate xml";
-					cout << "\n" << "/deactivate csv";
-					cout << "\n" << "/quit";
-					cout << "\n" << "/clear";
-					for (int i = 0; i < pf.noFormats; i++) {
-						cout << "\n" << pf.formats[i];
-					}
-					
-					break;
-				case 4:
-					// csv
-					cout << buffer.activateCSV();
-					break;
-				case 5:
-					// xml
-					cout << buffer.activateXML();
-					break;
-				case 6:
-					// deactivate xml
-					cout << buffer.deactivateXML();
-					break;
-				case 7:
-					// deactivate csv
-					cout << buffer.deactivateCSV();
-					break;
-				default:
-					if (!buffer.checkCmd(*tableBuffer)) {
-						cout << endl << "Command not recognized: " << buffer.getFullCmd();
-					}
-					
-					break;
+				checkCommands(secondaryCmds);
+			}
+			else
+			{
+				checkCommands(primaryCmds);
 			}
 		}
 		catch (const exception& e) {
 			cout << e.what() << endl;
 			continue;
-		}
-	}
-}
+		};
+	};
+};

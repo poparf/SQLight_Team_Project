@@ -1,6 +1,5 @@
 #pragma once
 using namespace std;
-#define NO_SECONDARY_COMMANDS 7
 
 string toLowerCase(string input) {
 	for (int i = 0; i < input.length(); i++) {
@@ -9,21 +8,6 @@ string toLowerCase(string input) {
 		}
 	}
 	return input;
-}
-
-void printLine() {
-	cout << "\nsqlight> ";
-}
-
-int checkSecondaryCommand(string fullCmd) {
-	string additionalCommands[NO_SECONDARY_COMMANDS] = { "/quit", "/clear", "/help", "/activate csv", "/activate xml", "/deactivate xml", "/deactivate csv"};
-
-	for (int i = 0; i < NO_SECONDARY_COMMANDS; i++) {
-		if (fullCmd == additionalCommands[i]) {
-			return i + 1;
-		}
-	}
-	return -1;
 }
 
 string getCurrentDate() {
@@ -39,4 +23,16 @@ string getCurrentDate() {
 	strftime(date, sizeof(date), "%d_%m_%Y_%H_%M_%S", &timeInfo);
 
 	return string(date);
+}
+
+template<class T>
+void checkCommands(T** t) {
+	for (int i = 0; i < T::counter; i++) {
+		if (t[i] != nullptr) {
+			if (t[i]->check()) {
+				t[i]->process();
+				return;
+			}
+		}
+	}
 }
