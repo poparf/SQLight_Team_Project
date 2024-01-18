@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <regex>
 #include <functional> 
 #include "utils.h"
@@ -7,6 +7,21 @@
 #include "TableBuffer.h"
 #include "Files.h"
 #include "RgxManager.h"
+
+
+/*
+✔Implementation of a class to exemplify the concept of class composition through has-a relations
+The extension of classes defined in the previous phases by adding new attributes (necessary in this phase) is done only by derivation and NOT by modifying the existing classes - minimum 2 extensions
+✔Implement at least one abstract class (with or without attributes) that must contain at least 2 pure virtual methods
+Add to an existing class or a new class at least 2 virtual methods (other than pure virtual methods) that are overridden in derived classes
+By using an abstract class or a basic class (newly defined or existing one) define at least one hierarchy to describe a family of classes (eg for types of expenses, etc.); an example of a family of classes defined to describe geometric shapes
+
+		command
+	
+
+Implement at least on vector of pointers to a base class type (the parent of the hierarchy) and use it to manage real objects from the hierarchy (a hierarchy/framework of classes is given by a set of classes that are in a is-a relation between them and have a common parent); an example of a family of classes defined to describe geometric shapes (for this example the pointers in the array will have the Shape type)
+Optional Implement at least one vector, set, list, and map collection from the STL library to manage application data (collections are used either in existing classes or in new ones added at this stage). You can refactor an existing class by replacing common arrays with STL collections.
+*/
 
 
 #define regexFilePath "regexList.txt"
@@ -50,6 +65,263 @@ public:
 // - Fisierul text de care se ocupa rgxmanager
 // - functia implementata
 
+
+/*
+Aici ar putea sa fie o interfata pentru comanda
+fiecare comanda sa dea inherit la interfata
+
+
+*/
+
+
+class Statement
+{
+protected:
+	static string input;
+
+public:
+	static void setInput() {
+		getline(cin, input);
+
+		if (input.length() <= 0) {
+			input = ""; // Reset the input in the statement class
+			throw exception("Error reading the input. Try again.");
+		}
+	};
+};
+
+class PrimaryCmd : public Statement {
+protected:
+	regex cmdRgx;
+public:
+	static const int counter = 8;
+
+	virtual bool check() = 0;
+
+	// Buffer releated
+	virtual void process() = 0;
+};
+
+class CreateOperation : public PrimaryCmd {
+protected:
+	regex partialRgx;
+	static const regex partitionRegex;
+	smatch matches;
+public:
+	// Write into a file using a file class
+	// Every Create command does this
+	virtual void write() = 0;
+};
+
+const regex CreateOperation::partitionRegex("[^ ,()][a-zA-Z0-9\"'”’\s*]*");
+
+class CreateTable : public CreateOperation {
+public:
+	CreateTable() {
+		this->cmdRgx.assign("^\s*CREATE\s+TABLE\s+([A-Za-z][A-Za-z0-9]+)\s*(IF\s+NOT\s+EXISTS)?\s+\(\s*((?:\(\s*[A-Za-z][A-Za-z0-9]+\s*,\s*[A-Za-z]+\s*,\s*[0-9]+\s*,\s*[A-Za-z0-9\"']+\s*\)\s*,?\s*)+?)\s*\)$");
+		this->partialRgx.assign("^\s*CREATE\s+TABLE\s*");
+	}
+
+	bool check(TableBuffer& tb) {
+		regex_search(this->input, this->matches, this->cmdRgx);
+
+		string tableName = matches[1].str();
+		// If not exist condition
+		if (matches[2] != "") {
+			// Checking the buffer
+			if (tb.isTable(tableName) != -1) {
+				throw exception("Another table found with the same name IN BUFFER.");
+			}
+			// Checking the files
+			ifstream file(tableName + ".bin", ios::binary);
+			if (file.is_open()) {
+
+				file.close();
+				throw exception("Another table found with the same name ON DISK.");
+			}
+		}
+
+		this->process(tb);
+	}
+
+private:
+	void process(TableBuffer& tb) {
+		string beforePartition = matches[3].str();
+
+		auto words_begin = sregex_iterator(beforePartition.begin(), beforePartition.end(), partitionRegex);
+		auto words_end = sregex_iterator();
+
+		// de ce am impartit la 4 ?
+		// pentru ca in fiecare paranteza sunt cate 4 valori
+		// noi vrem sa creeam cate o coloana pt fiecare paranteza
+		// iar fiecare coloana are atribuite cate 4 valori
+		int noCols = distance(words_begin, words_end) / 4;
+		Column** cols = new Column * [noCols];
+		for (int i = 0; i < noCols; i++)
+			cols[i] = new Column("", columnTypes::FLOAT, 0, ""); // we initialize a default column since we don t have a default constructor
+
+		int j = 0;
+		int k = 0;
+		// aici nu putem folosi i pentru ca e de tipul regex iterator nu int
+		for (sregex_iterator i = words_begin; i != words_end; ++i) {
+
+			smatch match = *i;
+			string match_str = match.str();
+			switch (k) {
+			case 0:
+				cols[j]->setName(match_str);
+				break;
+			case 1:
+				if (toLowerCase(match_str) == "integer")
+					cols[j]->setType(columnTypes::INTEGER);
+				else if (toLowerCase(match_str) == "float")
+					cols[j]->setType(columnTypes::FLOAT);
+				else if (toLowerCase(match_str) == "text")
+					cols[j]->setType(columnTypes::TEXT);
+				else
+					throw exception("Type of column must be integer, float or text.");
+				break;
+			case 2:
+				// stoi() transforms strings in integers
+				cols[j]->setSize(stoi(match_str));
+				break;
+			case 3:
+				cols[j]->setDef(match_str);
+				break;
+			}
+
+			// valorile din paranteze sunt stocate secvential asa ca iteram la rand.
+			// asta inseamna ca o sa dam de column name din 4 in 4 numere: 0 4 8 etc..
+			// j-ul este nr coloanei care creste dupa ce trecem prin toate informatiile din coloana
+			// care sunt 4 la nr. numele tipul size si default
+			// de asta resetam k la 0, k e ca si cazul la care ne aflam
+			k += 1;
+			if (k == 4) {
+				j += 1;
+				k = 0;
+			}
+		}
+
+		// We create the table and save it in the buffer and in files
+		Table t(matches[1].str(), cols, noCols);
+		this->write(t, tb);
+	}
+
+	void write(Table t, TableBuffer& tb) {
+		tb.addTable(t);
+		outTable ot;
+		ot.write(matches[1].str() + ".bin", t);
+	}
+};
+
+class CreateIndex : public CreateOperation {
+
+};
+
+class InsertRow : public CreateOperation {
+
+};
+
+// Import table data from CSV
+// Extending InsertRow functionality: requirment 2
+class Import : public InsertRow {
+
+};
+
+class ReadOperation : public PrimaryCmd {
+protected:
+	regex partialRgx;
+public:
+	virtual void display() = 0;
+
+	// CSV/XML files
+	virtual void raport() = 0;
+};
+
+class SelectValues : public ReadOperation {
+
+};
+
+class UpdateOperation : public PrimaryCmd {
+protected:
+	regex partialRgx;
+public:
+	virtual void write() = 0;
+};
+
+class UpdateTable : public UpdateOperation {
+
+};
+
+class DeleteOperation : public PrimaryCmd {
+public:
+	virtual void del() = 0;
+};
+
+class DropTable : public DeleteOperation {
+
+};
+
+class DropIndex : public DeleteOperation {
+
+};
+
+// Since these are simple commands we ll use a string not a regex
+class SecondaryCmd : public Statement {
+protected:
+	string cmd;
+public:
+	static const int counter = 5;
+
+	virtual bool check() {
+		if (this->cmd == this->input)
+			this->process();
+		else
+			throw exception("Wrong input. Try again.");
+	};
+
+	virtual void process() = 0;
+};
+
+
+class UtilityCmd : public SecondaryCmd {
+public:
+	static const int counter = 3;
+};
+
+
+
+class QuitCmd : public UtilityCmd {
+public:
+
+};
+
+class ClearConsoleCmd : public UtilityCmd {
+
+};
+
+class HelpCmd : public UtilityCmd {
+
+};
+
+class SettingsCmd : public SecondaryCmd {
+protected:
+	static bool xmlGeneration;
+	static bool csvGeneration;
+};
+
+bool SettingsCmd::xmlGeneration = false;
+bool SettingsCmd::csvGeneration = false;
+
+class XML : public SettingsCmd {
+
+};
+
+class CSV : public SettingsCmd {
+
+};
+
+
 class CmdProcessor
 {
 private:
@@ -69,7 +341,6 @@ public:
 		this->xmlGeneration = true;
 		return "\nXML generation activated.\n";
 	}
-
 	string deactivateXML() {
 		if (this->xmlGeneration == false) {
 			return "\nXML generation is already off.";
@@ -182,9 +453,15 @@ public:
 
 private:
 
+
+	/*
+	La toate comenzile in loc sa le procesez in table
+	ar trebui sa folosesc getters
+	si sa dau replace in buffer dupa
+	*/
 	void createTable(smatch matches, TableBuffer& tb) {
-		regex partitionRegex("[^ ,()][a-zA-Z0-9\"'��\\s*]*");
-		smatch partitionMatches;
+		regex partitionRegex("[^ ,()][a-zA-Z0-9\"'”’\\s*]*");
+
 		string tableName = matches[1].str();
 		// If not exist condition
 		if (matches[2] != "") {
@@ -200,7 +477,7 @@ private:
 				throw exception("Another table found with the same name ON DISK.");
 			}
 		}
-
+		
 		string beforePartition = matches[3].str();
 
 		auto words_begin = sregex_iterator(beforePartition.begin(), beforePartition.end(), partitionRegex);
@@ -391,6 +668,7 @@ private:
 
 		Table t = tb.getTable(tb.isTable(tableName));
 
+		
 		t.deleteFrom(matches[2].str(), matches[3].str());
 		tb.replaceTable(t);
 		outTable ot;

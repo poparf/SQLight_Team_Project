@@ -375,7 +375,7 @@ public:
 
 		delete[] this->rows;
 	}
-
+	//nume [prea lung
 	Table filterTableWithWhereClauseAndSpecificColumns(string* colNamesToBePrinted, int noCols, string whereColumn, string valueToMatch, int noGen) {
 		int colIndexToBeMatched = isColumn(whereColumn);
 		if (colIndexToBeMatched == -1) {
