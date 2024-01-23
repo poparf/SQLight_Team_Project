@@ -44,6 +44,24 @@ public:
 		file.close();
 	}
 
+	// Don t write the .idx extension
+	void readIndex(string fileName) {
+		ifstream file(fileName + ".idx", ios::binary);
+
+		if (!file.is_open())
+			throw exception("Could not open file to read indexes.");
+
+		int noOffsetsFile;
+		file.read((char*)&noOffsetsFile, sizeof(int));
+
+		int* offsetsFile = new int[noOffsetsFile];
+		for (int i = 0; i < noOffsetsFile; i++) {
+			file.read((char*)&offsetsFile[i], sizeof(int));
+		}
+
+		file.close();
+	}
+
 	string getName() {
 		return this->name;
 	}

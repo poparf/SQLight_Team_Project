@@ -427,7 +427,17 @@ public:
 			file.read(buffer2, sizeof(char) * colDefValueSize);
 			string defValue = string(buffer2);
 
+			Index idx;
+
+			int fileNameIndexSize;
+			file.read((char*)&fileNameIndexSize, sizeof(int));
+
+			char buffer3[1000];
+			file.read(buffer3, sizeof(char) * fileNameIndexSize);
+			string fileNameIndex = string(buffer3);
+			
 			cols[i] = new Column(colName, (columnTypes)colType, size, defValue);
+			cols[i]->setIndex(idx);
 		}
 
 
@@ -521,6 +531,10 @@ public:
 	}
 
 	void process() {
+		if (matches[2] == "") {
+			throw exception(pf.guideline["INSERT ROW"].c_str());
+		}
+
 		//	// matches[1] =  table name
 		//	// matches[2] = ce e in paranteza
 		string tableNameInput = matches[1].str();
@@ -640,6 +654,12 @@ public:
 		string tableName = matches[5].str();
 		loadTableIfNecessary(tableName);
 
+		// Legat de index:
+		
+		
+		/*
+				
+		*/
 
 		Table t = (*tb).getTable((*tb).isTable(tableName));
 		if (toLowerCase(matches[1].str()) == "all") {
@@ -716,7 +736,6 @@ private:
 	}
 
 };
-
 
 class DisplayTable : public ReadOperation {
 public:
@@ -853,19 +872,20 @@ public:
 	}
 
 	void process() {
+		this->del();
+
 		int index = (*tb).isTable(matches[1].str());
 		if (index == -1)
-			throw exception("There is not table with this name in buffer.");
+			throw exception("The table is not in the buffer anymore.");
 
 		(*tb).removeTable(index);
-		this->del();
 	}
 private:
 	void del() {
 		if (remove((matches[1].str() + ".bin").c_str()))
-			cout << endl << "There is no file with this name on the disk.";
+			cout << endl << "There is no file with this name on the disk.\n";
 		else
-			cout << endl << "Table deleted sucessfuly.";
+			cout << endl << "Table deleted sucessfuly.\n";
 	}
 };
 

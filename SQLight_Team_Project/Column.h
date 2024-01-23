@@ -27,6 +27,11 @@ public:
 		this->index.writeIndex();
 	}
 
+	// This is called when we read the index from a file so there s no need to write the index again in a file
+	void setIndex(Index idx) {
+		this->index = idx;
+	}
+
 	Index getIndex() {
 		return this->index;
 	}

@@ -34,6 +34,13 @@ public:
 			int defValueSize = defValue.size() + 1;
 			file.write((char*)&defValueSize, sizeof(int));
 			file.write(defValue.c_str(), sizeof(char) * defValueSize);
+
+			// Write the name of the file which stores the index here
+			string fileIndexName = t.columns[i]->getIndex().getName();
+			int fileIndexNameSize = fileIndexName.size() + 1;
+			file.write((char*)&fileIndexNameSize, sizeof(int));
+			file.write(fileIndexName.c_str(), sizeof(char) * fileIndexNameSize);
+			//
 		}
 
 		for (int i = 0; i < t.noRows; i++) {
@@ -130,7 +137,22 @@ public:
 			file.read(buffer2, sizeof(char) * colDefValueSize);
 			string defValue = string(buffer2);
 
+			// Read the index here
+			Index idx;
+
+			int fileNameIndexSize;
+			file.read((char*)&fileNameIndexSize, sizeof(int));
+
+			char buffer3[1000];
+			file.read(buffer3, sizeof(char) * fileNameIndexSize);
+			string fileNameIndex = string(buffer3);
+			if (fileNameIndex != "") {
+				idx.readIndex(fileNameIndex);
+			}
+			
+			//
 			cols[i] = new Column(colName, (columnTypes)colType, size, defValue);
+			cols[i]->setIndex(idx);
 		}
 
 		Table temp(fileName.substr(0, fileName.size() - 4), cols, noCols);
