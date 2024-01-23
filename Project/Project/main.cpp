@@ -12,17 +12,7 @@ using namespace std;
 
 
 /*
-Mai trebuie facut create index si drop index
-- se salveaza offsetul pt fiecare valoare de la coloana ceruta ca si valoare int. pt fiecare row salvam un int
-- le salvam intr-un alt fisier binar si le citim atunci cand citim si tabelul in buffer
-- la select dam check daca coloana din select e si n index daca da ne folosim de index sa o afisam
-- la insert adaugam noul row la index
-
-
-create si drop functioneaza dar la cum functioneaza in prezent select ul si scrierea tabelelor
-daca vreau sa folosesc un index la select trebuie sa l am in tabel
-iar cand citesc un tabel dintr un fisier binar nu am si index ul scris tot acolo. am index ul in alt fisier
-iar ca sa l citesc nu stiu numele fisierului.
+Mai trebuie facut doar select ul folosind index
 
 */
 string Statement::input;
