@@ -56,7 +56,6 @@ int main(int argc, char* argv[]) {
 	primaryCmds[7] = &dropIndex;
 	primaryCmds[8] = &deleteFrom;
 	primaryCmds[9] = &displayTable;
-	PrimaryCmd::counter--;
 
 	QuitCmd quit;
 	ClearConsoleCmd clear;
@@ -70,7 +69,6 @@ int main(int argc, char* argv[]) {
 	secondaryCmds[2] = &help;
 	secondaryCmds[3] = &csv;
 	secondaryCmds[4] = &xml;
-	SecondaryCmd::counter--;
 
 	while (--argc > 0) {
 		string fileName = string(argv[argc]);

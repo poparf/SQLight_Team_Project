@@ -233,7 +233,7 @@ protected:
 public:
 	// Do not include a header.
 	void generateCSV(string tableName, Table & t) {
-		csvFile.open(tableName + ".csv");
+		this->csvFile.open(tableName + ".csv");
 
 		// Write header row with column names
 		for (int i = 0; i < t.noColumns; ++i) {
@@ -261,9 +261,9 @@ public:
 		ifstream csvFile(fileName);
 
 		if (!csvFile.is_open()) {
-			cout << endl << fileName;
-			cout << "Error opening CSV file." << endl;
-			return;
+			//cout << "\nError opening CSV file." << endl;
+			throw exception("Error opening CSV file.");
+			//return;
 		}
 
 		string line;
@@ -279,7 +279,7 @@ public:
 			Row row(cells, noCells);
 		
 
-			t.addRow(row); // Assuming you have a function to add a row to the table
+			t.addRow(row);
 		
 			for (int i = 0; i < noCells; i++) {
 				delete cells[i];

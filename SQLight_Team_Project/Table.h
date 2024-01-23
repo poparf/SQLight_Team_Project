@@ -231,8 +231,52 @@ public:
 		for (int i = 0; i < this->noRows; i++) {
 			newRows[i] = new Row(*this->rows[i]);
 		}
+		
+		if (row.getNoCells() == this->getNoColumns()) {
+			int noCells = this->getNoColumns();
+			Article** inputCells = row.getCells();
+			
+			// Check if the size is bigger than the allowed size.
+			for (int i = 0; i < noCells; i++) {
+				if (inputCells[i]->getData().length() > this->columns[i]->getSize()) {
+					string message = "Size of argument " + to_string(i + 1) + " is longer than the allowed size: " + to_string(this->columns[i]->getSize());
+					throw exception(message.c_str());
+				}
+			}
 
-		newRows[this->noRows] = new Row(row);
+			newRows[this->noRows] = new Row(row);
+		}
+		else {
+			Article** oldCells = row.getCells();
+			int oldNoCells = row.getNoCells();
+			Article** newCells = new Article * [this->getNoColumns()];
+			int noCells = this->getNoColumns();
+			for (int i = 0; i < oldNoCells; i++) {
+				newCells[i] = new Article(*oldCells[i]);
+			}
+			
+			for (int i = oldNoCells; i < noCells; i++) {
+				if (this->columns[i]->getType() == columnTypes::TEXT) {
+					newCells[i] = new Article("\'" + this->columns[i]->getDef() + "\'");
+				}
+				else {
+					newCells[i] = new Article(this->columns[i]->getDef());
+				}
+			}
+
+			Row r2(newCells, noCells);
+
+
+			// Check if the size is bigger than the allowed size.
+			for (int i = 0; i < noCells; i++) {
+				if (newCells[i]->getData().length() > this->columns[i]->getSize()) {
+					string message = "Size of argument "+ to_string(i + 1) + " is longer than the allowed size: " + to_string(this->columns[i]->getSize());
+					throw exception(message.c_str());
+				}
+			}
+
+			newRows[this->noRows] = new Row(r2);
+		}
 
 		this->deleteRows();
 
@@ -508,7 +552,12 @@ private:
 			throw new invalid_argument("Invalid row index");
 		}
 
-
+		if (this->noRows == 1) {
+			this->rows[0] = nullptr;
+			this->noRows--;
+			return;
+		}
+		// BUG daca e doar un row nu se sterge
 		for (int i = index; i < this->noRows - 1; i++) {
 			*this->rows[i] = *this->rows[i + 1];
 		}

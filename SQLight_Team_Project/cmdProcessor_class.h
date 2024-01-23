@@ -145,6 +145,7 @@ bool SettingsCmd::csvGeneration = false;
 class XML : public SettingsCmd {
 public:
 	XML() {
+		this->cmd = "/toggle xml";
 		this->counter++;
 	}
 
@@ -203,7 +204,7 @@ protected:
 			// Check if the file exists
 			ifstream f(tableNameInput + ".bin", ios::binary);
 			if (!f.is_open()) {
-				throw exception("INSERT_ERROR: There is no table with this name.");
+				throw exception("ERROR: There is no table with this name.");
 			}
 
 			// Load the table from the file
@@ -241,7 +242,7 @@ public:
 class CreateTable : public CreateOperation {
 public:
 	CreateTable() {
-		this->cmdRgx.assign("^\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9]+)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]+\\s*,\\s*[A-Za-z]+\\s*,\\s*[0-9]+\\s*,\\s*[A-Za-z0-9\"]+\\s*\\)\\s*,?\\s*)+?)\\s*\\)$", regex::icase);
+		this->cmdRgx.assign("^\\s*CREATE\\s+TABLE\\s+([A-Za-z][A-Za-z0-9_]+)\\s*(IF\\s+NOT\\s+EXISTS)?\\s+\\(\\s*((?:\\(\\s*[A-Za-z][A-Za-z0-9]+\\s*,\\s*[A-Za-z]+\\s*,\\s*[0-9]+\\s*,\\s*[A-Za-z0-9\"']+\\s*\\)\\s*,?\\s*)+?)\\s*\\)$", regex::icase);
 		this->partialRgx.assign("^\\s*CREATE\\s+TABLE\\s*", regex::icase);
 		this->counter++;
 	}
@@ -568,9 +569,9 @@ class Import : public InsertRow {
 public:
 
 	Import() {
-		this->cmdRgx.assign("^\\s*IMPORT\\s+([a-zA-Z0-9]+)\\s+([a-zA-Z0-9.]+)$", regex::icase);
+		this->cmdRgx.assign("^\\s*IMPORT\\s+([a-zA-Z0-9]+)\\s+([a-zA-Z0-9._]+)$", regex::icase);
 		this->partialRgx.assign("^\\s*IMPORT\\s*", regex::icase);
-		this->counter++;
+		//this->counter++; already increasing when calling the InsertRow constructor !
 	}
 
 	bool check() {
@@ -591,8 +592,8 @@ public:
 	void process() {
 		loadTableIfNecessary(matches[1].str());
 		Table t = (*tb).getTable((*tb).isTable(matches[1].str()));
-		(*tb).replaceTable(t);
 		this->write(t);
+		(*tb).replaceTable(t);
 	}
 private:
 
@@ -616,7 +617,7 @@ public:
 class SelectValues : public ReadOperation {
 public:
 	SelectValues() {
-		this->cmdRgx.assign("^\\s*SELECT\\s*((\\((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+\\))+|(ALL))\\s*FROM\\s+([a-zA-Z0-9]+)+\\s*(WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9]+))?$", regex::icase);
+		this->cmdRgx.assign("^\\s*SELECT\\s*((\\((\\s*[a-zA-Z0-9]+\\s*,?\\s*)+\\))+|(ALL))\\s*FROM\\s+([a-zA-Z0-9]+)+\\s*(WHERE\\s+([a-zA-Z0-9]+)\\s*=\\s*([a-zA-Z0-9'\"]+))?$", regex::icase);
 		this->partialRgx.assign("^\\s*SELECT\\s*", regex::icase);
 		this->counter++;
 	}
@@ -626,7 +627,7 @@ public:
 			return 0;
 		}
 		if (!regex_search(this->input, this->matches, this->cmdRgx)) {
-			cout << endl << pf.guideline["CREATE INDEX"];
+			cout << endl << pf.guideline["SELECT"];
 			return 0;
 		}
 		return 1;
@@ -721,7 +722,7 @@ class DisplayTable : public ReadOperation {
 public:
 	
 	DisplayTable() {
-		this->cmdRgx.assign("^\\s*DISPLAY\\s+TABLE\\s+([a-zA-Z0-9]*)\\s*$", regex::icase);
+		this->cmdRgx.assign("^\\s*DISPLAY\\s+TABLE\\s+([a-zA-Z0-9_]*)\\s*$", regex::icase);
 		this->partialRgx.assign("^\\s*DISPLAY\\s+TABLE\\s*", regex::icase);
 		this->counter++;
 	}
@@ -779,7 +780,7 @@ public:
 			return 0;
 
 		if (!regex_search(this->input, this->matches, this->cmdRgx)) {
-			cout << endl << pf.guideline["UPDATE TABLE"];
+			cout << endl << pf.guideline["UPDATE"];
 			return 0;
 		}
 
@@ -863,13 +864,15 @@ private:
 	void del() {
 		if (remove((matches[1].str() + ".bin").c_str()))
 			cout << endl << "There is no file with this name on the disk.";
+		else
+			cout << endl << "Table deleted sucessfuly.";
 	}
 };
 
 class DropIndex : public DeleteOperation {
 public:
 	DropIndex() {
-		this->cmdRgx.assign("^\\s*DROP\\s+INDEX\\s+([a-zA-Z0-9]+)\\s*$", regex::icase);
+		this->cmdRgx.assign("^\\s*DROP\\s+INDEX\\s+([a-zA-Z0-9_]+)\\s*$", regex::icase);
 		this->partialRgx.assign("^\\s*DROP\\s+INDEX\\s*", regex::icase);
 		this->counter++;
 	}
@@ -918,7 +921,7 @@ class DeleteFrom : public DeleteOperation {
 public:
 
 	DeleteFrom() {
-		this->cmdRgx.assign("^\\s*DELETE\\s+FROM\\s+([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s+=\\s+([a-zA-Z0-9]+)\\s*$", regex::icase);
+		this->cmdRgx.assign("^\\s*DELETE\\s+FROM\\s+([a-zA-Z0-9]+)\\s+WHERE\\s+([a-zA-Z0-9]+)\\s+=\\s+([a-zA-Z0-9\"']+)\\s*$", regex::icase);
 		this->partialRgx.assign("^\\s*DELETE\\s+FROM\\s*", regex::icase);
 		this->counter++;
 	}

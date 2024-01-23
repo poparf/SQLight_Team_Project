@@ -38,7 +38,7 @@ public:
 		this->noCells = r.noCells;
 
 		Article** newCells = new Article * [r.noCells];
-
+		
 		for (int i = 0; i < r.noCells; i++) {
 			newCells[i] = new Article(*r.cells[i]);
 		}
